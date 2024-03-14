@@ -471,73 +471,148 @@ public function resetTransporter(Request $request){
     ]);
   }
 
-  public function transportApproveStatus(Request $request){
-    $length     =   16;
-    $pool       =   '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $password   =   substr(str_shuffle(str_repeat($pool, 5)), 0, $length);
+public function transportApproveStatus(Request $request)
+{
+    $length = 16;
+    $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $password = substr(str_shuffle(str_repeat($pool, 5)), 0, $length);
 
-    $userUpdate =  User::where('id',$request->id)->update([
-        'is_approve'=>$request->status,
-        'is_email_verified'=>'1',
-        'password'=>bcrypt($password)]);
-    if($userUpdate){
-     $user                  =   User::where('id',$request->id)->first();
-     $emailData['id']       =   $user->unique_ID;
-     $emailData['email']    =   $user->email;
-     $emailData['customer'] =   $user->name;
-     $emailData['password'] =   $password;
+    $userUpdate =  User::where('id', $request->id)->update([
+        'is_approve' => $request->status,
+        'is_email_verified' => '1',
+        'password' => bcrypt($password)
+    ]);
 
-     if ($user->language_code=='ar') {
+    if ($userUpdate) {
+        $user = User::where('id', $request->id)->first();
+        $emailData['id'] = $user->unique_ID;
+        $emailData['email'] = $user->email;
+        $emailData['customer'] = $user->name;
+        $emailData['password'] = $password;
 
-        $emailData['subject']  =  'حياكم الله في عربات';
-        $view                  =  'emails.approve_transporter_ar';
+        if ($user->language_code == 'ar') {
+            $emailData['subject'] = 'حياكم الله في عربات';
+            $view = 'emails.approve_transporter_ar';
+        } elseif ($user->language_code == 'ur') {
+            $emailData['subject'] = 'رجسٹریشن ایکٹیویشن';
+            $view = 'emails.approve_transporter_ur';
+        } else {
+            $emailData['subject'] = 'Registration activation';
+            $view = 'emails.approve_transporter';
+        }
 
-    } elseif ($user->language_code=='ur') {
-        $emailData['subject']  =  'رجسٹریشن ایکٹیویشن';
-        $view                  =  'emails.approve_transporter_ur';
+        // Send email
+        sendMail($view, $emailData);
 
-    }else{
-        $emailData['subject']  =  'Registration activation';
-        $view                  =  'emails.approve_transporter';
+        // Construct SMS message
+        $message_body_en = 'Dear ' . $user->name . ', We welcome you as a partner with Arabat.
+
+        This SMS  serves as a confirmation that your account is activated and that you are officially a part of the Arabat family.';
+
+       $message_body_ar = $user->name . ' عزيزي،' .
+    "\n\n" .
+    'السلام عليكم' .
+    "\n\n" .
+    'نرحب بكم كشريك معنا في عربات. هذا الرسالة بمثابة تأكيد على تنشيط حسابك كناقل وأنك رسميًا جزء من أسرة عربات.';
+
+
+
+        // Combine English and Arabic messages
+        $message_body = $message_body_en . "\n\n" . $message_body_ar;
+
+        // Send SMS
+        $this->sendSMS($user->phone_number, $message_body); 
+
+        // Check if there's a referrer
+        $greferrer = User::where('id', $user->id)->where('referrer_id', '!=', '')->first();
+        if ($greferrer) {
+            if (ReferrerWallet::where('user_id', $user->id)->doesntExist()) {
+                $data = [
+                    'user_id' => $user->id,
+                    'earn' => 5,
+                    'spend' => '',
+                ];
+                ReferrerWallet::create($data);
+
+                if (ReferrerWallet::where('user_id', $greferrer->referrer_id)->doesntExist()) {
+                    $data = [
+                        'user_id' => $greferrer->referrer_id,
+                        'earn' => 5,
+                        'spend' => '',
+                    ];
+                    ReferrerWallet::create($data);
+                } else {
+                    ReferrerWallet::where('user_id', $greferrer->referrer_id)->increment('earn', 5);
+                }
+            }
+        }
+
+        return response()->json([
+            'message' => 'Approved successfully',
+            'success' => 1,
+        ]);
     }
-    sendMail($view,$emailData);
 
+    return response()->json([
+        'message' => 'User not found or update failed',
+        'success' => 0,
+    ]);
 }
 
-$user                  =   User::where('id',$request->id)->first();
-$greferrer = User::where('id',$user->id)->where('referrer_id','!=','')->first();
-if ($greferrer) {
+protected function sendSMS($phone_number, $message_body)
+    {
+        try {
+            // Retrieve the language from the session
+            $language_code = session()->get('language', 'en'); // Default to English if language is not set
 
-    if (ReferrerWallet::where('user_id',$user->id)->doesntExist()) {
-        $data=[
-            'user_id'       =>$user->id,
-            'earn'          =>5,
-            'spend'         =>'',
-        ];
-        ReferrerWallet::create($data);
+            $complete_mobile_number = $phone_number;
 
-        if (ReferrerWallet::where('user_id',$greferrer->referrer_id)->doesntExist()) {
-            $data=[
-                'user_id'       =>$greferrer->referrer_id,
-                'earn'   =>5,
-                'spend'   =>'',
+            // Construct the message body based on the language
+            $apiUrl = 'https://api.taqnyat.sa/v1/messages';
+            $accessToken = '475b33120697346bd743efb7e311993f';
+
+            $headers = [
+                'Authorization: Bearer ' . $accessToken,
+                'Content-Type: application/json',
             ];
-            ReferrerWallet::create($data);
-        }else{
-            ReferrerWallet:: where('user_id',$greferrer->referrer_id)->increment('earn', 5);
+
+            $data = [
+                'recipients' => [$complete_mobile_number],
+                'body' => $message_body,
+                'sender' => 'Arabat.sa',
+            ];
+
+            \Log::info([
+                'transporter_signup_data----' => $data
+            ]);
+
+            $ch = curl_init($apiUrl);
+
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+            $response = curl_exec($ch);
+
+
+            if (curl_errno($ch)) {
+                echo 'Error: ' . curl_error($ch);
+            }
+
+            curl_close($ch);
+
+            \Log::info([
+                'transporter_signup--' => $response
+            ]);
+        } catch (\Exception $e) {
+            \Log::info([
+                'error occured in sending sms for forget pass' => $e->getMessage() . ' on line no ' . $e->getLine() . ' in file ' . $e->getFile()
+            ]);
         }
     }
-}
 
 
-return response()->json([
-
-    'message'=>'Approved successfully',
-    'success'=>1,
-
-]);
-
-}
 public function transportUnApproveStatus(Request $request){
 
     $userUpdate =  User::where('id',$request->id)->update([
@@ -688,7 +763,7 @@ public function DriverAdd(Request $request){
     $data['unique_ID']      = $unique_id;
     $data['name']           = $request->name;
     $data['phone_number']   = $request->phone_number; 
-   // $data['city']           = $request->city; 
+   $data['status']           = '0'; 
     $data['password']       = bcrypt($request->password);
     $data['parent_id']      = $request->transport_id;
     $data['is_phone_verified']='1';

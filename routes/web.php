@@ -68,6 +68,18 @@ Route::middleware(['auth:admin','prevent-back-history'])->group(function (){
     Route::get('create-user', [UserController::class, 'create'])->name('create-user');
     Route::get('/check_user_email', [UserController::class, 'checkUserEmail'])->name('check_user_email');
     Route::post('add-user', [UserController::class, 'add'])->name('add_user');
+    Route::get('create-market', [UserController::class, 'market'])->name('create-market');
+    Route::post('add-market', [UserController::class, 'addMarket'])->name('add_market');
+    Route::get('show-market', [UserController::class, 'showMarket'])->name('show_market');
+    Route::get('/edit-market/{id}', [UserController::class, 'editMarket'])->name('edit-market');
+    Route::put('/update-market/{id}', [UserController::class, 'updateMarket'])->name('update-market');
+    // Route::delete('/delete-market/{id}', [UserController::class, 'deleteMarket'])->name('delete-market');
+
+
+
+
+
+
     
     Route::post('update-user-status',[UserController::class,'updateUserStatus'])->name('update.user.status');
     Route::post('user-email-check',[UserController::class,'emailCheck'])->name('user.email.check');

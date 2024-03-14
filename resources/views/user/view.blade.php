@@ -380,9 +380,11 @@
                                         </tr>
                                       </thead>
                                       <tbody id="tbody">
+                                        @php $counter = 0; @endphp
                                         @foreach($transactions as $key=>$transaction)
+                                        @if(!empty($transaction->job->job_ID))
                                         <tr>
-                                          <td>{{$key+1}}</td>                                                        
+                                          <td>{{$counter+1}}</td>                                                        
                                           <td>{{@$transaction->booking->book_id}}</td>
                                           <td>{{@$transaction->job->job_ID}}</td>
                                           <td>{{@$transaction->driver->name}}</td>
@@ -394,6 +396,8 @@
                                            <!-- <a class="action-button" title="View" href="{{route('payments.show',$transaction->id)}}"><i class="text-info fa fa-eye"></i></a> -->
                                          </td> 
                                        </tr>
+                                         @php $counter++; @endphp
+                                       @endif
                                        @endforeach
                                      </tbody>
                                    </div>

@@ -5,8 +5,10 @@ use Config;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 use Validator;
-use Storage;
 use App\Models\Job;
+use App\Models\Market;
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Storage;
 use App\Models\VehicleType;
 use App\Models\Vehicle;
 use App\Exports\ExportUser;
@@ -39,6 +41,7 @@ return view('user.index',compact('users'));
 
 public function index(Request $request)
 {
+
     if ($request->ajax()) { 
 
         $data = User::select('*')->where('role_id',Config::get('variables.User'))->withCount('booking')->orderBy('id','DESC');
@@ -131,6 +134,13 @@ public function create()
     return view('user.create');
 }
 
+public function market()
+{
+    return view('user.market_create');
+}
+
+
+
 public function add(Request $request)
 {    
     $unique_id = IdGenerator::generate([
@@ -175,6 +185,124 @@ public function add(Request $request)
     User::insert($data);
     return redirect()->route('users.index')->with('success','User Added successfully');
 }
+
+
+
+public function addMarket(Request $request)
+{
+    echo storage_path('app');
+    // Validate the incoming request
+    $request->validate([
+        'heading' => 'required|string',
+        'text' => 'required|string',
+        'image' => 'image|mimes:jpeg,png,jpg,gif', // Updated validation for image upload
+        'media' => 'required|file|mimes:mp4,mov,avi,wmv', // Updated validation for video upload
+
+    ]);
+    
+    $imagePath = null; // Initialize image path variable
+
+    // Store the uploaded image if present
+    if ($request->hasFile('image')) {
+        $image = $request->file('image');
+        $imagePath = 'storage/' . $image->store('market', 'public');
+    }
+
+     $mediaPath = null; // Initialize media path variable
+
+    // Store the uploaded media file if present
+    if ($request->hasFile('media')) {
+        $media = $request->file('media');
+        $mediaPath = 'storage/' . $media->store('market', 'public');
+    }
+    
+    // Create a new Market instance
+    $market = new Market();
+    $market->heading = $request->heading;
+    $market->text = $request->text;
+    $market->image = $imagePath; // Save the image path to the database
+    $market->media = $mediaPath; // Save the image path to the database
+    $market->address = $request->address; // Save the image path to the database
+
+
+    $market->created_at = now();
+    $market->updated_at = now();
+
+    // Save the Market instance to the database
+    $market->save();
+
+    // Redirect back with success message
+    return redirect()->route('create-market')->with('success', 'Market added successfully');
+}
+
+
+ public function showMarket()
+    {
+        $markets = Market::all(); // Fetch all market data
+
+        return view('user.show_market', compact('markets'));
+    }
+
+
+
+public function editMarket($id)
+    {
+        $market = Market::findOrFail($id);
+        
+        //dd($market);
+        return view('user.edit_market', compact('market'));
+    }
+
+   public function updateMarket(Request $request, $id)
+{
+    // Validate the incoming request
+    $request->validate([
+        'heading' => 'required|string',
+        'text' => 'required|string',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif', // Updated validation for image upload
+        'media' => 'nullable|file|mimes:mp4,mov,avi,wmv', // Updated validation for video upload
+    ]);
+
+    $market = Market::findOrFail($id);
+
+    $imagePath = $market->image; // Preserve existing image path
+
+    // Store the uploaded image if present
+    if ($request->hasFile('image')) {
+        $image = $request->file('image');
+        $imagePath = 'storage/' . $image->store('Market', 'public');
+    }
+
+    $mediaPath = $market->media; // Preserve existing media path
+
+    // Store the uploaded media file if present
+    if ($request->hasFile('media')) {
+        $media = $request->file('media');
+        $mediaPath = 'storage/' . $media->store('Market', 'public');
+    }
+
+    // Update market information
+    $market->heading = $request->heading;
+    $market->text = $request->text;
+    $market->image = $imagePath; // Save the image path to the database
+    $market->media = $mediaPath; // Save the media path to the database
+    $market->address = $request->address;
+
+    // Save the updated market instance
+    $market->save();
+
+    // Redirect back with success message
+    return redirect()->route('edit-market', $id)->with('success', 'Market updated successfully');
+}
+
+public function deleteMarket(Request $request, $id)
+{
+    $market = Market::findOrFail($id);
+    $market->delete();
+
+    return redirect()->route('show_market')->with('success', 'Market deleted successfully.');
+}
+
 
 /**
 * Store a newly created resource in storage.

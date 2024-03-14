@@ -29,7 +29,7 @@
                   <div class="col-6">
                     <div class="form-group">
                       <label for="radius">{{ __('adminlte::adminlte.radius') }} / KM <span class="text-danger"> *</span></label>
-                      <input type="text" placeholder="Radius" name="radius" value="{{@$setting->radius}}" class="form-control" id="radius" maxlength="100" >
+                      <input type="text" placeholder="Radius" name="radius" value="{{@$setting->radius}}" class="form-control" id="radius" >
                       @if($errors->has('radius'))
                       <div class="error">{{ $errors->first('radius') }}</div>
                       @endif
@@ -121,6 +121,36 @@
                       </div>
                     </div>
 
+
+
+                      <div class="col-3">
+                      <div class="form-group">
+                        <label for="radius">Show Promotion on App<span class="text-danger"> *</span></label> 
+                        <select name="show_promo_app" class="form-control" id="show_promo_app">
+                          <option value="1" <?php if($setting->show_promo_app==1) {echo 'selected';} ?>>Yes</option>
+                          <option value="2" <?php if(!empty($setting)){ if($setting->show_promo_app==2) {echo 'selected';}}else{echo 'selected';} ?>>No</option>
+                        </select>
+                      </div>
+                    </div>
+
+
+
+                      <div class="col-3">
+                      <div class="form-group">
+                        <label for="radius">Show Referel on App<span class="text-danger"> *</span></label> 
+                        <select name="show_referel_app" class="form-control" id="show_referel_app">
+                          <option value="1" <?php if($setting->show_referel_app==1) {echo 'selected';} ?>>Yes</option>
+                          <option value="2" <?php if(!empty($setting)){ if($setting->show_referel_app==2) {echo 'selected';}}else{echo 'selected';} ?>>No</option>
+                        </select>
+                      </div>
+                    </div>
+
+
+
+
+
+
+
                     <div class="col-3">
                       <div class="form-group">
                         <label for="radius">Driver invited Limit for RFQ<span class="text-danger"> *</span></label> 
@@ -167,7 +197,6 @@
           radius: {
             required: true,
             number:true,
-            max:100,
           }, 
           schedule_day_time: {
             required: true
