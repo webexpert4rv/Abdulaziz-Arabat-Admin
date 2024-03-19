@@ -195,11 +195,10 @@ public function addMarket(Request $request)
     $request->validate([
         'heading' => 'required|string',
         'text' => 'required|string',
-        'image' => 'image|mimes:jpeg,png,jpg,gif', // Updated validation for image upload
-        'media' => 'required|file|mimes:mp4,mov,avi,wmv', // Updated validation for video upload
-
+        'image' => 'nullable|image', // Allow image uploads without size limitation
+        'media' => 'nullable|file', // Allow video and image uploads without size limitation
     ]);
-    
+        
     $imagePath = null; // Initialize image path variable
 
     // Store the uploaded image if present
