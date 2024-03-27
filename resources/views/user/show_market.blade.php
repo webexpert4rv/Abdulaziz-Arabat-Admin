@@ -37,10 +37,8 @@
                                 <td>{{ $market->text }}</td>
                                 <td>
                                     <a href="{{ route('edit-market', $market->id) }}" class="btn btn-sm btn-primary">Edit</a>
-<!--                                         <button class="btn btn-sm btn-danger delete-market" data-market-id="{{ $market->id }}">Delete</button>
- -->
-                                    <!-- Replace 'edit-market' with your actual edit route name -->
                                 </td>
+                                
                             </tr>
                             @endforeach
                         </tbody>

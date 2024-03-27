@@ -207,13 +207,13 @@ public function addMarket(Request $request)
         $imagePath = 'storage/' . $image->store('market', 'public');
     }
 
-     $mediaPath = null; // Initialize media path variable
+    $mediaPath = ''; // Default value for media path
 
-    // Store the uploaded media file if present
-    if ($request->hasFile('media')) {
-        $media = $request->file('media');
-        $mediaPath = 'storage/' . $media->store('market', 'public');
-    }
+// Store the uploaded media file if present
+if ($request->hasFile('media')) {
+    $media = $request->file('media');
+    $mediaPath = 'storage/' . $media->store('market', 'public');
+}
     
     // Create a new Market instance
     $market = new Market();
@@ -293,6 +293,7 @@ public function editMarket($id)
     // Redirect back with success message
     return redirect()->route('edit-market', $id)->with('success', 'Market updated successfully');
 }
+
 
 public function deleteMarket(Request $request, $id)
 {
