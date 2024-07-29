@@ -275,33 +275,21 @@ return [
                     'url'  => 'admin/users',
                     'active' => ['admin/users/*','admin/job-show*'],
                     'can' => ['add_user','edit_user','view_user','delete_user'],
-                   
                 ],
-
-               [
+                [
                     'text' => 'Transporters',
                     'icon' => 'fas fa-fw fa-user',
                     'url'  => 'admin/transporters',
                     'active' => ['admin/transporters*','admin/driver-show/*'],
                     'can' => ['add_transporter','edit_transporter','view_transporter','delete_transporter'],
-                ],
-                
+                ],                
                 [
-                    'text' => 'admins',
-                    'icon' => 'fas fa-fw fa-universal-access',
-                    'url'  => 'admin/admins/list',
-                    'active' => ['admin/admins*'],
-                    'can' => ['add_admins','edit_admins','view_admins','delete_admins'],
-                   
+                    'text' => 'Driver',
+                    'icon' => 'fas fa-fw fa-user',
+                    'url'  => 'admin/driver/list',
+                    'active' => ['admin/driver*','admin/driver-list/*'],
+                   // 'can' => ['add_transporter','edit_transporter','view_transporter','delete_transporter'],
                 ],
-               
-                // [
-                //     'text' => 'HiActa Team',
-                //     'icon' => 'fas fa-fw fa-user-friends',
-                //     'url'  => 'admin/hiacta_team/list',
-                //     'active' => ['admin/hiacta_team*'],
-               
-                // ],
             ],
         ], 
         [
@@ -508,6 +496,14 @@ return [
                     'active' => ['admin/testimonials*'],
                     'can' => ['view_testimonials','edit_testimonials','delete_testimonials','add_testimonials'],
                 ],
+                [
+                    'text' => 'Requests User Information',
+                    'icon' => 'fas fa-star',
+                    
+                    'url'  => 'admin/update_info/list',
+                    'active' => ['admin/information*'],
+                   // 'can' => ['view_review','delete_review','edit_review'],
+                ],
             ]
         ],
              // reports
@@ -525,17 +521,17 @@ return [
                     'can' => ['view_reports'],
                 ],
                 [
-                    'text' => 'Quations & Invoices',
+                    'text' => 'Quotations & Invoices',
                     'icon' => 'fas fa-chart-bar',
                     'url'  => 'admin/download-quation-invoice',
                     'active' => ['admin/download-quation-invoice*'],
                     'can' => ['view_reports'],
                 ],
-             
+            
             ],
         ],
 
-         [
+        [
             'text' => 'Blogs Management',
             'icon' => 'fas fa-chart-bar',
             'active' => ['admin/blogs*'],
@@ -586,14 +582,12 @@ return [
                     'url'  => 'admin/product',
                     'active' => ['admin/product/*'],
                     
-                ],
-               
+                ],               
                 [
                     'text' => 'Pricing',
                     'icon' =>'fa fa-list',
                     'url'  => 'admin/pricing',
-                    'active' => ['admin/pricing*'],
-                  
+                    'active' => ['admin/pricing*'],                  
                 ],
                 [
                     'text' => 'Region',
@@ -613,18 +607,14 @@ return [
                     'text' => 'Bank Account',
                     'icon' =>'fa fa-list',
                     'url'  => 'admin/bank-account',
-                    'active' => ['admin/bank-account*'],
-                  
+                    'active' => ['admin/bank-account*'],                  
                 ],
                 [
                     'text' => 'Setting',
                     'icon' =>'fa fa-list',
                     'url'  => 'admin/setting',
-                    'active' => ['admin/setting*'],
-                  
-                ],
-                  
-
+                    'active' => ['admin/setting*'],                  
+                ],          
             ],
         ],
         [
@@ -632,10 +622,15 @@ return [
             'icon'    => 'fas fa-fw fa-cogs',
             'url'  => '#',
             'active' => ['admin/roles*'],
-            'can' => ['manage_roles','manage_permission'],
-
-            	
+            //'can' => ['manage_roles','manage_permission'],
             'submenu' => [
+                [
+                    'text' => 'admins',
+                    'icon' => 'fas fa-fw fa-universal-access',
+                    'url'  => 'admin/admins/list',
+                    'active' => ['admin/admins*'],
+                    'can' => ['add_admins','edit_admins','view_admins','delete_admins'],                   
+                ],
                 [
                     'text' => 'roles',
                     'icon'    => 'fas fa-fw fa-users',
@@ -660,7 +655,6 @@ return [
             'active' => ['admin/recycle_bin*'],
             'can' => ['manage_recycle_bin'],
             'submenu' => [
-               
                 [
                     'text' => 'Users',
                     'icon' => 'fas fa-fw fa-briefcase',
@@ -685,49 +679,39 @@ return [
                 [
                     'text' => 'admins',
                     'icon' => 'fas fa-fw fa-universal-access',
-                    'url'  => 'admin/recycle_bin/admins/deleted',
-                   
+                    'url'  => 'admin/recycle_bin/admins/deleted',                   
                 ],
 
                 [
                     'text' => 'Jobs',
                     'icon' => 'fas fa-fw fa fa-newspaper',
-                    'url'  => 'admin/recycle_bin/jobs/deleted',
-                   
+                    'url'  => 'admin/recycle_bin/jobs/deleted',                   
                 ],
                 [
                     'text' => 'Website Content',
                     'icon' => 'fas fa-fw fa-laptop',
-                    'url'  => 'admin/recycle_bin/webiste_content/deleted',
-                   
+                    'url'  => 'admin/recycle_bin/webiste_content/deleted',                   
                 ],
                 [
                     'text' => 'Mobile Content',
                     'icon' => 'fas fa-fw fa-mobile',
-                    'url'  => 'admin/recycle_bin/mobile_content/deleted',
-                   
+                    'url'  => 'admin/recycle_bin/mobile_content/deleted',                   
                 ],
                 [
                     'text' => 'Banners',
                     'icon' => 'fas fa-chart-bar',
-                    'url'  => 'admin/recycle_bin/banner/deleted',
-                   
+                    'url'  => 'admin/recycle_bin/banner/deleted',                   
                 ],
                 [
                     'text' => 'Reviews',
                     'icon' => 'fas fa-star',
-                    'url'  => 'admin/recycle_bin/reviews/deleted',
-                   
+                    'url'  => 'admin/recycle_bin/reviews/deleted',                   
                 ],
                 [
                     'text' => 'Testimonials',
                     'icon' => 'fas fa-chart-bar',
-                    'url'  => 'admin/recycle_bin/testimonials/deleted',
-                   
-                ],
-                
-            
-                
+                    'url'  => 'admin/recycle_bin/testimonials/deleted',                   
+                ],                   
             ],
         ],
         

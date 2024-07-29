@@ -73,7 +73,7 @@
                     </div>
                   </div>
                   <div class="col-6">
-                    <div class="form-group">
+                    <div class="form-group"> 
                       <label for="mobile">{{ __('adminlte::adminlte.mobile') }}<span class="text-danger"> *</span></label>
                       <input type="text" value="{{$transporter->country_code}} {{$transporter->phone_number}}" name="phone_number"  class="form-control" id="phone_number" placeholder="Mobile" maxlength="100" >
                       <div id ="mobile_error" class="error"></div>
@@ -302,7 +302,7 @@
   window.intlTelInput(input, {
     separateDialCode: true,
     hiddenInput: "full",
-    utilsScript: "{{asset('build/js/utils.js')}}",
+  //  utilsScript: "{{asset('build/js/utils.js')}}",
   });
 
 

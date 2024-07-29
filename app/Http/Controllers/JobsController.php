@@ -30,6 +30,7 @@ use App\Models\Booking;
 use App\Models\Notification as Notifica; 
 use App\Models\RequestQuotes;
 use Illuminate\Support\Facades\Notification;
+use App\Models\JobsPaymentDetails;
 use Log;
 use DB;
 class JobsController extends Controller
@@ -64,8 +65,7 @@ class JobsController extends Controller
     }*/
 
 
-    public function index(Request $request)
-    
+    public function index(Request $request)    
     {
     
         if ($request->ajax()) { 
@@ -88,8 +88,7 @@ class JobsController extends Controller
                 
                 $data->where('status',$request->job_status);
                 
-            }
-            
+            }            
 
             $getData=$data->get();
             
@@ -125,9 +124,6 @@ class JobsController extends Controller
                 $btn =  ucfirst($row->status) ;
                 return $btn;
             })
-
-
-
             ->addColumn('action', function($row){
 
                 $btn1=$btn2=$btn3=$btn4='';
@@ -158,46 +154,43 @@ class JobsController extends Controller
 
         return view('jobs.index');
     } 
-        public function expiredJob(Request $request) {
-             // echo Carbon::now();
-            $jobs=Job::where('is_active_date','<=',Carbon::now())->orderBy('id', 'DESC')->pluck('id');
-            // echo '<pre>'; print_r($jobs); die;
-            $receiveQuotes=ReceiveQuotes::whereNotIn('job_id',$jobs)->pluck('job_id');
-            // echo '<pre>'; print_r($receiveQuotes); die;
-            $getNewJobs = RequestQuotes::whereIn('job_id',$jobs)->where('admin_assignjob_to_transporter','1')->pluck('job_id');
-            // echo '<pre>'; print_r($getNewJobs); die;
-            $expiredJobs= Job::whereNotIn('id',$getNewJobs)->orderBy('id', 'DESC')->get(); 
-            // echo '<pre>'; print_r($expiredJobs); die;
-            $getTransporters=User::select('*')->where('role_id',Config::get('variables.Transporter'))->where('status','1')->get(); 
-            return view('jobs.expiredJob',compact('expiredJobs','getTransporters'));
-        }
+    public function expiredJob(Request $request) {
+            // echo Carbon::now();
+        $jobs=Job::where('is_active_date','<=',Carbon::now())->orderBy('id', 'DESC')->pluck('id');
+        // echo '<pre>'; print_r($jobs); die;
+        $receiveQuotes=ReceiveQuotes::whereNotIn('job_id',$jobs)->pluck('job_id');
+        // echo '<pre>'; print_r($receiveQuotes); die;
+        $getNewJobs = RequestQuotes::whereIn('job_id',$jobs)->where('admin_assignjob_to_transporter','1')->pluck('job_id');
+        // echo '<pre>'; print_r($getNewJobs); die;
+        $expiredJobs= Job::whereNotIn('id',$getNewJobs)->orderBy('id', 'DESC')->get(); 
+        // echo '<pre>'; print_r($expiredJobs); die;
+        $getTransporters=User::select('*')->where('role_id',Config::get('variables.Transporter'))->where('status','1')->get(); 
+        return view('jobs.expiredJob',compact('expiredJobs','getTransporters'));
+    }
 
-         public function pendingPayment(Request $request) {
-             
-            // $receiveQuotes=ReceiveQuotes::where('status','payment-pending')->with('users')->get();
-            $todayDateTime = date("Y-m-d H:i:s");
-            // echo $todayDateTime;
-            $pendingPayments = DB::table('receive_quotes')->select('jobs.job_ID','receive_quotes.id','receive_quotes.quote_amount','receive_quotes.status','u.name as userName','d.name as driverName')
-                            ->join('jobs','receive_quotes.job_id','=','jobs.id')
-                            ->join('users as u','receive_quotes.user_id','=','u.id')
-                            ->join('users as d','receive_quotes.driver_id','=','d.id')
-                            ->where('receive_quotes.status','payment-pending')
-                            ->where('receive_quotes.approved_by_admin','no')
-                            ->where('receive_quotes.is_active_date','>=',$todayDateTime)
-                            ->orderBy('id','desc')->get();
+    public function pendingPayment(Request $request) {
+            
+        // $receiveQuotes=ReceiveQuotes::where('status','payment-pending')->with('users')->get();
+        $todayDateTime = date("Y-m-d H:i:s");
+        // echo $todayDateTime;
+        $pendingPayments = DB::table('receive_quotes')->select('jobs.job_ID','receive_quotes.id','receive_quotes.quote_amount','receive_quotes.status','u.name as userName','d.name as driverName')
+                        ->join('jobs','receive_quotes.job_id','=','jobs.id')
+                        ->join('users as u','receive_quotes.user_id','=','u.id')
+                        ->join('users as d','receive_quotes.driver_id','=','d.id')
+                        ->where('receive_quotes.status','payment-pending')
+                        ->where('receive_quotes.approved_by_admin','no')
+                        ->where('receive_quotes.is_active_date','>=',$todayDateTime)
+                        ->orderBy('id','desc')->get();
 
 
 
-            // echo '<pre>'; print_r($pendingPayments); die; 
-            return view('jobs.pendingPayments',compact('pendingPayments'));
-        }
+        // echo '<pre>'; print_r($pendingPayments); die; 
+        return view('jobs.pendingPayments',compact('pendingPayments'));
+    }
 
-        public function bookingNew($quoteId)
+    public function bookingNew($quoteId)
     {
-
-        $quote = ReceiveQuotes::where('id',$quoteId) 
-        ->isExpired()->where('status','payment-pending')->with('driver','job')->first();
-
+        $quote = ReceiveQuotes::where('id',$quoteId) ->isExpired()->where('status','payment-pending')->with('driver','job')->first();
         if ($quote) {
 
             $vehicle     =  Vehicle::where('driver_id',$quote->driver->id)->with('vehicleType')->first();
@@ -207,15 +200,9 @@ class JobsController extends Controller
 
             $data = json_decode($quote->data, true);
             $pay_amount = $quote->quote_amount;
-
-
-            //$getResponse = $this->makePayment($request,$pay_amount);   
-
-
-
-            // if (@$getResponse['approved']) {
-            if (true) {  // bypassing the payment
-
+           
+            if (true) {  
+                
                 $bookings = IdGenerator::generate(
                     [
                         'table' => 'bookings',
@@ -257,7 +244,7 @@ class JobsController extends Controller
 
                 ];               
 
-
+ 
                 $getBooking = Booking::create($booking);
 
 
@@ -290,8 +277,7 @@ class JobsController extends Controller
                     }
                 }
 
-
-                //echo 'Rahul'; die;
+ 
                 $tracking_id =(dechex($getBooking->id).uniqid());
 
                 $getBooking->update([
@@ -332,7 +318,7 @@ class JobsController extends Controller
                     'approved'      =>@$getResponse['approved'],
                     'customer'      =>@$getResponse['customer']['id'],
                     'customer_email'=>@$getResponse['customer']['email'],
-//                    'response'      =>json_encode($getResponse),
+                //  'response'      =>json_encode($getResponse),
                     'bank_account_id'  =>@$getResponse['bank_account_id'],
                     'bank_name'        =>@$getResponse['bank_name'],
                     'account_info'     =>@$getResponse['account_info'],
@@ -349,9 +335,6 @@ class JobsController extends Controller
 
                 ]);
 
-
-
-
                 $booking  =  Booking::where('id',$getBooking->id)
                 ->with('driver',function($q){
                     $q->with('transporter');
@@ -363,13 +346,10 @@ class JobsController extends Controller
                 $message        ='Client mobile number : '.$user->phone_number .' and pickup address : '  . $booking->job->pick_up_address;
                 sendWhatsappMessage($country_code,$number,$message);
 
-
-
                 $getBookingDetail =Booking::where('id',$getBooking->id)->with('user','driver','job')->first();
                 $jobReceivers =JobReceiver::with('DestinationAddres')->where('job_id',$getBookingDetail->job_id)->get();
 
 
-                
                 $pricing    =   Pricing::first();
                 $commission=(($getBookingDetail->quote_amount*$pricing->online_payment_discount)/100)*(1+$pricing->tax/100); 
 
@@ -386,7 +366,6 @@ class JobsController extends Controller
                     }
                 }
  
-
                 if($getBookingDetail->job->product->name=='Other') {
                     $title=$getBookingDetail->job->other;
 
@@ -431,7 +410,7 @@ class JobsController extends Controller
 
                         'sub_amount'          =>@$getBookingDetail->quote_amount,
                         'status'              =>@$getBookingDetail->job->status, 
-                        'city'     =>$user->language_code=="ar"?@$getBookingDetail->pickupSubRegion->arabic_name:@$getBookingDetail->pickupSubRegion->name,
+                        'city'                =>$user->language_code=="ar"?@$getBookingDetail->pickupSubRegion->arabic_name:@$getBookingDetail->pickupSubRegion->name,
 
                     ],
                     'tota'=>[
@@ -447,6 +426,7 @@ class JobsController extends Controller
                     'jobReceivers' =>$jobReceivers
                 ]; 
 
+
                 $emailData['email']    =  $getBookingDetail->user->email;         
 
                 $emailData['subject']  =  'Service invoice';
@@ -457,198 +437,279 @@ class JobsController extends Controller
                 }else{
                     $view                  =  'emails.email_invoice'; 
                 }
+
                sendMail($view,$emailData);
-
-
-
-
 
                 $getUser   = User::where('id',$user->id)->where('login_status','1')->where('status','1')->where('is_push_notifications','1')->first(); 
 
                 $getdriver   = User::where('id', $quote->driver_id)->where('login_status','1')->where('status','1')->where('is_push_notifications','1')->first(); 
                 
                 $gettransporter  = User::where('id',@$getdriver->parent_id)->where('login_status','1')->where('status','1')->where('is_push_notifications','1')->first(); 
-                if (isset($getUser->fcmTokens)) {
-                    foreach($getUser->fcmTokens as $key=> $token){
+               
+
+                if (isset($getdrivers->fcmTokens)) {
+
+                    if($getdrivers->language_code=="ar")
+                    {
+                        $title ="تم قبول سعرك من قبل العميل";
+                        $body  ="تم قبول السعر الذي قدمته من قبل العميل وبإمكانك الاطلاع على التفاصيل في صفحة الحمولات النشطة";
+                    }else if($getdrivers->language_code=="ur"){
+                        $title  ="آپ کی قیمت کی پیشکش قبول کر لی گئی ہے۔";
+                        $body  = "";
+                    }else{
+                        $title ="Your Quote Has Been Accepted";
+                        $body = "The user has accepted your price offer";
+                    }
+
+                    Notifica::create([
+                        'sender_id'     =>Auth()->user()->id, 
+                        'receiver_id'   => $quote->driver_id, 
+                        'action_id'      =>$quote->job_id,               
+                        
+                        'type'          =>'Quote', 
+                        'isRead'        =>'0',
+                        'title'         =>"Your Quote Has Been Accepted", 
+                        'description'   =>"The user has accepted your price offer",
+                        'title_arabic'  =>"تم قبول سعرك من قبل العميل",
+                        'description_arabic' =>"تم قبول السعر الذي قدمته من قبل العميل وبإمكانك الاطلاع على التفاصيل في صفحة الحمولات النشطة",
+                    ]);   
+                    foreach($getdrivers->fcmTokens as $key=> $token){
                         if($token->token_type==='ios'){
                             $data=[
-                                'title'        => 'Booking successfull', 
+                                'title'        =>  $title, 
+                                'body'         => 'Your quote has been accepted',             
+                                'html'         => 'HTML',
+                                'id'           =>  $quote->job_id,
+                                'type'         =>  2,
+                                "badge_count"   => $getdrivers->badge_count,
+                                "account_type"   => $getdrivers->account_type,
+                            ];
+                            
+                            $datess = iosPushNotification($token->token, $title, $body,$data);
+                        }else{
+                            Notification::send($getdrivers, new \App\Notifications\QuoteAccepted($quote->job_id, $title, $body)); 
+                        }                        
+                    }
+                }
+                if (isset($getTransporter->fcmTokens)) {
+
+                    if($getTransporter->language_code=="ar")
+                    {
+                        $title ="تم قبول سعرك من قبل العميل";
+                        $body  ="تم قبول السعر الذي قدمته من قبل العميل وبإمكانك الاطلاع على التفاصيل في صفحة الحمولات النشطة";
+                    }else if($getTransporter->language_code=="ur"){
+                        $title  ="آپ کی قیمت کی پیشکش قبول کر لی گئی ہے۔";
+                        $body  = "";
+                    }else{
+                        $title ="Your Quote Has Been Accepted";
+                        $body = "The user has accepted your price offer";
+                    }
+
+                    Notifica::create([
+                        'sender_id'     =>Auth()->user()->id, 
+                        'receiver_id'   => $getTransporter->id, 
+                        'action_id'      =>$quote->job_id,    
+                        'type'          =>'Quote', 
+                        'isRead'        =>'0',
+                        'title'         =>"Your Quote Has Been Accepted", 
+                        'description'   =>"The user has accepted your price offer",
+                        'title_arabic'  =>"تم قبول سعرك من قبل العميل",
+                        'description_arabic' =>"تم قبول السعر الذي قدمته من قبل العميل وبإمكانك الاطلاع على التفاصيل في صفحة الحمولات النشطة",
+                    ]); 
+        
+                    foreach($getTransporter->fcmTokens as $key=> $token){
+                        if($token->token_type==='ios'){
+                            $data=[
+                                'title'        => $title, 
+                                'body'         => 'Your quote has been accepted',             
+                                'html'         => 'HTML',
+                                'id'           =>  $quote->job_id,
+                                'type'         =>  2,
+                                "badge_count"   => $getTransporter->badge_count,
+                                "account_type"   => $getTransporter->account_type,
+                            ];                        
+                            $datess = iosPushNotification($token->token,$title,$body,$data);
+                        }else{
+                            Notification::send($getTransporter, new \App\Notifications\QuoteAccepted($quote->job_id,$title,$body)); 
+                        }                        
+                    }
+                }
+                $senddriverSMS = User::where('id',$quote->driver_id)->first(); 
+                sendSMSAcceptJobToTransporter($senddriverSMS->transporter->phone_number,$senddriverSMS->transporter->name,$quote->job_id);
+                sendSMSAcceptJobToDriver($senddriverSMS->phone_number,$senddriverSMS->name,$quote->job_id); 
+
+
+                /************ */
+                if (isset($getUser->fcmTokens)) {
+
+                    if($getUser->language_code=="ar")
+                    {
+                        $title ="تم الحجز بنجاح!";
+                        $body  ="تم تقديم طلبك بنجاح وبانتظار التسعير من ناقلين";
+                    }else if($getUser->language_code=="ur"){
+                        $title  ="آپ کی ریزرویشن کامیاب ہو گئی ہے!";
+                        $body  = "";
+                    }else{
+                        $title ="Your Job Booked Successfully";
+                        $body = "Your requested is booked and sent to transporters";
+                    }
+                    foreach($getUser->fcmTokens as $key=> $token){
+                        if($token->token_type==='ios'){
+                            $data=[                                
+                                'title'        =>  $title, 
                                 'body'         => 'Your job successfully booked.',             
                                 'html'         => 'HTML',
                                 'id'           =>  $quote->job_id,
                                 'type'         =>  1,
                                 'service_type' => 'test_data',
+                                'account_type' =>  $getUser->account_type,                            
                             ];
-                            $datess = iosPushNotification($token->token,"Booking successfull","Your job successfully booked",$data);
+                            $datess = iosPushNotification($token->token,$title, $body,$data);
                         }else{
-
-                            Notification::send($getUser, new \App\Notifications\Booking($quote->job_id));
+                            Notification::send($getUser, new \App\Notifications\Booking($quote->job_id,$title, $body));
                         }
                     }  
+
+                    Notifica::create([
+                        'sender_id'     =>$user->id, 
+                        'receiver_id'   =>$user->id,  
+                        'action_id'      =>$quote->job_id,
+                        'type'          =>'booking', 
+                        'isRead'        =>'0',
+                        'title'         =>"Your Job Booked Successfully", 
+                        'description'   =>"Your requested is booked and sent to transporters",
+                        'title_arabic'       =>"تم الحجز بنجاح!",
+                        'description_arabic' =>"تم تقديم طلبك بنجاح وبانتظار التسعير من ناقلين",
+                    ]);
                 }  
+              
 
-               // Notification::send($getUser, new \App\Notifications\Booking($quote->job_id));
-
-                Notifica::create([
-                    'sender_id'     =>$user->id, 
-                    'receiver_id'   =>$user->id,  
-                    'action_id'      =>$quote->job_id,            
-                    'title'         =>"booking successful", 
-                    'type'          =>'booking', 
-                    'isRead'        =>'0',
-                    'description'   =>"Booking successfully",
-                    'title_arabic'       =>"تم الحجز بنجاح",
-                    'description_arabic' =>"تم الحجز بنجاح",
-                ]);
                 if (isset($getdriver->fcmTokens)) {
+                    if($getdriver->language_code=="ar")
+                    {
+                        $title ="الآن تم تكليفك بالمهمة";
+                        $body  ="الآن تم تكليفك بمهمة النقل ويمكنك الاطلاع على التفاصيل في الحمولات النشطة";
+                    }else if($getdriver->language_code=="ur"){
+                        $title  ="اب آپ کو ملازمت تفویض کی گئی ہے۔";
+                        $body  = "";
+                    }else{
+                        $title ="Now Job Assigned to You";
+                        $body = "The transporter has assigned a task to you";
+                    }
                     foreach($getdriver->fcmTokens as $key=> $tokent){
                         if($tokent->token_type==='ios'){
                             $data=[
-                                'title'        => 'New job assigned', 
+                                'title'        =>  $title, 
                                 'body'         => 'New job assigned',             
                                 'html'         => 'HTML',
                                 'id'           =>  $quote->job_id,
                                 'type'         =>  1,
                                 'service_type' => 'test_data',
+                                'account_type' =>  $getdriver->account_type,
                             ];
-                            $datess = iosPushNotification($tokent->token,"New job assigned","New job assigned",$data);
+                            
+                            $datess = iosPushNotification($tokent->token, $title,$body,$data);
                         }else{
-                         Notification::send($getdriver, new \App\Notifications\TransporterAssignment($quote->job_id));
-                     }
-                 } 
-             } 
-
-            // Notification::send($getdriver, new \App\Notifications\TransporterAssignment($quote->job_id));
-
-             Notifica::create([
-                'sender_id'     =>$user->id, 
-                'receiver_id'   => $quote->driver_id,
-                'action_id'   => $quote->job_id,               
-                'title'         =>"New job assigned", 
-                'type'          =>'Job', 
-                'isRead'        =>'0',
-                'description'   =>"New Job Assigned successfully",
-                'title_arabic'       =>"تعيين وظيفة جديدة",
-                'description_arabic' =>"تم تعيين وظيفة جديدة بنجاح",
-            ]);  
-
-
-             if (isset($gettransporter)) {
-              if (isset($gettransporter->fcmTokens)) {
-                foreach($gettransporter->fcmTokens as $key=> $tokent){
-                    if($tokent->token_type==='ios'){
-                        $data=[
-                            'title'        => 'Driver Assigned', 
-                            'body'         => 'Driver Assigned',             
-                            'html'         => 'HTML',
-                            'id'           =>  $getBooking->job_id,
-                            'type'         =>  1,
-                            'service_type' => 'test_data',
-                        ];
-                        $datess = iosPushNotification($tokent->token,"Driver Assigned","Driver Assigned",$data);
-                    }else{
-                       Notification::send($gettransporter, new \App\Notifications\DriverAssignment($getBooking->job_id));
-                   }
-               } 
-           } 
-                //Notification::send($gettransporter, new \App\Notifications\DriverAssignment($getBooking->job_id));
-           Notifica::create([
-            'sender_id'     =>$user->id, 
-            'receiver_id'   => $gettransporter->id,               
-            'title'         =>"New job assigned", 
-            'action_id'     => $getBooking->job_id,
-            'type'          =>'booking', 
-            'isRead'        =>'0',
-            'description'   =>"New Job Assigned successfully",
-            'title_arabic'       =>"تعيين وظيفة جديدة",
-            'description_arabic' =>"تم تعيين وظيفة جديدة بنجاح",
-        ]); 
-
-       }
-
-
-   }
-}
-}
-
-
-        public function pendingPaymentApprove(Request $request){
-
-            if(!empty($request->quote_id)){
-
-                 $approvePaymentData = ReceiveQuotes::where('id',$request->quote_id)->first();
-                 $getJob       = Job::where('id',$approvePaymentData->job_id)->first(); 
-                 $approvePayment = ReceiveQuotes::where('id',$request->quote_id)->update(['approved_by_admin'=>'yes']); 
-               // $userData = User::where('id', $approvePaymentData->user_id)->first();
-
-
-                 $this->bookingNew($request->quote_id);
-
-
-                //below code is to bypass the payment.
-                // $approvePayment = ReceiveQuotes::where('id',$request->quote_id)->update(['approved_by_admin'=>'yes', 'status'=>'accepted']);
-                $quoteCount = 1;
-                $driver_merge = [$approvePaymentData->user_id, $approvePaymentData->driver_id];
-                $drivers = User::whereIN('id',$driver_merge)->get();
-
-                if (count($drivers)) {
-
-                    foreach ($drivers as $key => $value) {
-
-                $getdrivers = User::where('id',$value->id)->where('is_push_notifications','1')->first(); 
-
-                if (isset($getdrivers->fcmTokens)) {
-
-                    foreach($getdrivers->fcmTokens as $key=> $tokenValue){
-
-
-                        Notifica::create([
-                            'sender_id'     =>Auth()->user()->id, 
-                            'receiver_id'   => $getdrivers->id, 
-                            'action_id'     =>  $getJob->id,               
-                            'title'         =>"Payment Request", 
-                            'type'          =>'Payment', 
-                            'isRead'        =>'0',
-                            'description'   =>"Payment Request Received",
-                            'title_arabic'  =>"طلب وظيفة", 
-                            'description_arabic'   =>"تم استلام طلب عمل جديد",
-                        ]); 
-    
-                        // \Log::info([
-                        //     'send--------------' => $getdrivers,
-                        //     '$getJob->id' => $getJob->id,
-                        //     '$getdrivers->account_type' => $getdrivers->account_type
-                        // ]);
-
-
-
-                        if($tokenValue->token_type==='ios'){
-                            $data=[
-                                'title'        => 'Payment Approved Sucessfully.', 
-                                'body'         => 'Payment Approved Sucessfully.',             
-                                'html'         => 'HTML',
-                                'id'           =>  $getJob->id,
-                                'type'         =>  1,
-                                'account_type' =>  $getdrivers->account_type,
-                                'service_type' => 'test_data',
-                                'quote_count'   => $quoteCount,
-                            ];
-
-                        }else{
-                            Notification::send($getdrivers, new \App\Notifications\User\PaymentRequestReceived($getJob->id,$quoteCount,$getdrivers->account_type)); 
+                            Notification::send($getdriver, new \App\Notifications\TransporterAssignment($quote->job_id, $title,$body));
                         }
                     } 
-                }
-            }
-        }
-                if($approvePayment){
-                    return 1;
-                }else{
-                    return 2;
-                }
 
+                    Notifica::create([
+                        'sender_id'     =>$user->id, 
+                        'receiver_id'   => $quote->driver_id,
+                        'action_id'   => $quote->job_id,
+                        'type'          =>'Job', 
+                        'isRead'        =>'0',
+                        'title'         =>"Now Job Assigned to You", 
+                        'description'   =>"The transporter has assigned a task to you",
+                        'title_arabic'       =>"الآن تم تكليفك بالمهمة",
+                        'description_arabic' =>"الآن تم تكليفك بمهمة النقل ويمكنك الاطلاع على التفاصيل في الحمولات النشطة",
+                    ]); 
+                }                
+
+                if (isset($gettransporter)) {
+                    if($gettransporter->language_code=="ar")
+                    {
+                        $title ="الآن تم تكليفك بالمهمة";
+                        $body  ="الآن تم تكليفك بمهمة النقل ويمكنك الاطلاع على التفاصيل في الحمولات النشطة";
+                    }else if($gettransporter->language_code=="ur"){
+                        $title  ="اب آپ کو ملازمت تفویض کی گئی ہے۔";
+                        $body  = "";
+                    }else{
+                        $title ="Now Job Assigned to You";
+                        $body = "The transporter has assigned a task to you";
+                    }
+                    if (isset($gettransporter->fcmTokens)) {
+                        foreach($gettransporter->fcmTokens as $key=> $tokent){
+                            if($tokent->token_type==='ios'){
+                                $data=[
+                                    'title'        =>$title, 
+                                    'body'         => 'Driver Assigned',             
+                                    'html'         => 'HTML',
+                                    'id'           =>  $getBooking->job_id,
+                                    'type'         =>  1,
+                                    'service_type' => 'test_data',
+                                    'account_type' =>  $gettransporter->account_type,
+                                ];
+                                $datess = iosPushNotification($tokent->token,$title,$body,$data);
+                            }else{
+                                Notification::send($gettransporter, new \App\Notifications\DriverAssignment($getBooking->job_id,$title,$body));
+                            }
+                        } 
+                    }  
+                    Notifica::create([
+                        'sender_id'     =>$user->id, 
+                        'receiver_id'   => $gettransporter->id,               
+                        'title'         =>"New job assigned", 
+                        'action_id'     => $getBooking->job_id,
+                        'type'          =>'booking', 
+                        'isRead'        =>'0',
+                        'description'   =>"New Job Assigned successfully",
+                        'title_arabic'       =>"تعيين وظيفة جديدة",
+                        'description_arabic' =>"تم تعيين وظيفة جديدة بنجاح",
+                    ]); 
+                    
+
+                }
             }
+        }       
+    }
+
+
+    public function pendingPaymentApprove(Request $request){
+
+        if(!empty($request->quote_id)){
+
+            $approvePaymentData = ReceiveQuotes::where('id',$request->quote_id)->first();
+            $getJob       = Job::where('id',$approvePaymentData->job_id)->first(); 
+            $approvePayment = ReceiveQuotes::where('id',$request->quote_id)->update(['approved_by_admin'=>'yes']);  
+            $this->bookingNew($request->quote_id);
+            
+            $quoteCount = 1;
+            $driver_merge = [$approvePaymentData->user_id, $approvePaymentData->driver_id];
+
+            $drivers = User::whereIN('id',$driver_merge)->get();
+ 
+            if (count($drivers)) {
+
+                foreach ($drivers as $key => $value) {
+
+                    $getdrivers = User::where('id',$value->id)->where('is_push_notifications','1')->first();                     
+
+                    $getTransporter   = User::where('id',$getdrivers->parent_id)->where('status','1')->where('account_type','2')->where('is_push_notifications','1')->first();  
+
+                    
+                }
+            }
+
+            if($approvePayment){
+                return 1;
+            }else{
+                return 2;
+            }
+
         }
+    }
 
 
 
@@ -661,19 +722,13 @@ class JobsController extends Controller
 
         $quote = ReceiveQuotes::where('id',$request->quote_id)->where('user_id',$userData->id)
         ->isExpired()->where('status','payment-pending')->with('driver','job')->first();
-        print_r($quote); die();
-        Log::info("hello"); 
-        Log::info($request->quote_id); 
-        Log::info($quote); 
-
 
         if ($quote) {
-
 
             $vehicle     =  Vehicle::where('driver_id',$quote->driver->id)->with('vehicleType')->first();
             $jobReceiver =  JobReceiver::where('job_id',$quote->job_id)->orderBy('id', 'ASC')->get();
 
-
+           // quote_amount
             $data = json_decode($quote->data, true);
             $pay_amount = @$data['total_amount'];
 
@@ -940,6 +995,7 @@ class JobsController extends Controller
                                 'id'           =>  $quote->job_id,
                                 'type'         =>  1,
                                 'service_type' => 'test_data',
+                                'account_type' =>  $getUser->account_type,
                             ];
                             $datess = iosPushNotification($token->token,"Booking successfull","Your job successfully booked",$data);
                         }else{
@@ -972,6 +1028,7 @@ class JobsController extends Controller
                                 'id'           =>  $quote->job_id,
                                 'type'         =>  1,
                                 'service_type' => 'test_data',
+                                'account_type' =>  $getdriver->account_type,
                             ];
                             $datess = iosPushNotification($tokent->token,"New job assigned","New job assigned",$data);
                         }else{
@@ -1006,6 +1063,7 @@ class JobsController extends Controller
                             'id'           =>  $getBooking->job_id,
                             'type'         =>  1,
                             'service_type' => 'test_data',
+                            'account_type' =>  $gettransporter->account_type,
                         ];
                         $datess = iosPushNotification($tokent->token,"Driver Assigned","Driver Assigned",$data);
                     }else{
@@ -1076,7 +1134,7 @@ class JobsController extends Controller
 
 
 
-        public function getTransporterList(Request $request){
+    public function getTransporterList(Request $request){
 
         $getVehicleList = Job::where('id',$request->job_id)->pluck('vehicle_type_id');
 
@@ -1086,44 +1144,55 @@ class JobsController extends Controller
 
         $getTransportersLists = User::whereIn('id',$getTransportersIds)->get();
          // echo '<pre>'; print_r($getTransportersList); die;
-         $html='';
+        $html='';
 
-         foreach($getTransportersLists as $getTransportersList){
+        foreach($getTransportersLists as $getTransportersList){
 
             $html.='<option value='.$getTransportersList->id.'>'.$getTransportersList->name.'</option>';
-         }
-         return $html;
         }
+        return $html;
+    }
 
         public function expiredJobSent(Request $request)
         {   
-            // echo $request->job_id;
             $user = Job::where('id',$request->job_id)->first();
 
-            $getDriverList = User::whereIn('parent_id',$request->transporter_id)->pluck('id');
-            // echo '<pre>';print_r($getDriverList); die;
-            $getDriversRecord = RequestQuotes::where('job_id',$request->job_id)->whereIn('driver_id',$getDriverList)->delete();
-             
-            if(!empty($getDriverList)){
- 
-            foreach($getDriverList as $getDrivers){
-            $addDrivers = RequestQuotes::create([
-                        'user_id'         =>$user->user_id,
-                        'job_id'         =>$request->job_id, 
-                        'driver_id'       =>$getDrivers,
-                        'is_active_date'  => $user->is_active_date,
-                        'admin_assignjob_to_transporter'=>'1',
+            $vehicleTypeId =explode(',', $user->vehicle_type_id);
+
+             // Calculate distance using Haversine formula
+
+            $distanceFormula = '(3959 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(`long`) - radians(?)) + sin(radians(?)) * sin(radians(lat))))';
+
+            // Retrieve drivers within a certain distance
+            $getDriverList = User::select('users.*')
+                ->selectRaw($distanceFormula . ' AS distance', [$user->pick_up_lat, $user->pick_up_long, $user->pick_up_lat])
+                ->join('vehicles', 'users.id', '=', 'vehicles.driver_id')
+                ->whereIn('parent_id', $request->transporter_id)
+                ->where('vehicles.status', '1')
+                ->whereIn('vehicles.vehicle_type_id', $vehicleTypeId)
+                ->havingRaw('distance <= 100')
+                ->groupBy('users.id')
+                ->pluck('id');
+
+            $getDriversRecord = RequestQuotes::where('job_id', $request->job_id)
+            // ->whereIn('driver_id', $getDriverList)
+            ->delete();
+
+            // Create new records for selected drivers
+            if ($getDriverList->isNotEmpty()) {
+                foreach ($getDriverList as $getDriver) {
+                    RequestQuotes::create([
+                        'user_id' => $user->user_id,
+                        'job_id' => $request->job_id,
+                        'driver_id' => $getDriver,
+                        'is_active_date' => $user->is_active_date,
+                        'admin_assignjob_to_transporter' => '1',
                     ]);
-            
-
+                }
             }
-             
-            }
-            
-
-             
+        
             return redirect()->back()->with('success','Job Sent successfully');
-             
+            
         }
 
         public function manuallyJob(Request $request){
@@ -1261,11 +1330,14 @@ class JobsController extends Controller
         $getVehicleType =VehicleType::where('id',$getJobData[0]['vehicle_type_id'])->get();
         $getProduct=Product::get();
         $getRegion=Region::where('status','1')->get();
+        $getRegion=Region::where('status','1')->get();
         $getUsers=User::select('*')->where('role_id',Config::get('variables.User'))->where('status','1')->get();
         $getTransporters=User::select('*')->where('role_id',Config::get('variables.Transporter'))->where('status','1')->get();
         $getTransporters=User::select('*')->where('role_id',Config::get('variables.Transporter'))->where('status','1')->get();
 
-        return view('jobs.create3',compact('getJobData','getBookingData','getJobReceiverData','getUserData','getDriverData','getVehicleType','getProduct','getRegion','getUsers','getTransporters'));
+        $jobsPaymentDetails=JobsPaymentDetails::where('job_id',$job_id)->first();
+
+        return view('jobs.create3',compact('getJobData','getBookingData','getJobReceiverData','getUserData','getDriverData','getVehicleType','getProduct','getRegion','getUsers','getTransporters','jobsPaymentDetails'));
     }
 
 
@@ -1315,8 +1387,7 @@ public function subRegions(Request $request)
     $thml ='<option value="">Select Your City</option>';
     foreach($getSubRegion as $value){
 
-            $subRegione=\Session::get('language')=="ar"?$value->arabic_name:Auth()->user()->language_code=="ur"?$value->arabic_name:$value->name;
-
+            $subRegione=$value->name;
 
 
         $thml.='<option value="'.$value->id.'">'.$subRegione.'</option>';
@@ -1325,6 +1396,9 @@ public function subRegions(Request $request)
     return $thml;
 
 }
+
+ 
+
 
 public function receiverWrap(Request $request)
 {
@@ -1818,6 +1892,11 @@ public function jobStore2(Request $request)
         $checkUserDetails=DB::table('users')->where('id',$request->user_id)->first();
         $checkTransporterDetails=DB::table('users')->where('id',$request->transporter_id)->first();
         $vehcleDetails=DB::table('vehicle_types')->where('id',$request->vehicle_type_id)->first();
+        $driverUserDetails=DB::table('users')->where('id',$request->driver_id)->first();
+
+        $this->sendSMSs($checkUserDetails->phone_number); 
+        $this->sendSMSs($checkTransporterDetails->phone_number); 
+        $this->sendSMSs($driverUserDetails->phone_number); 
 
          
 
@@ -1855,10 +1934,7 @@ public function jobStore2(Request $request)
         
        
 
-        // $verification_code   = rand(9999,4);        
-    $verification_code   = 10001;
-        //$message='رمز التحقق التسليم الخاص بك هو';
-        // receiverVerificationCode('966' ,$request->receiver_number,$verification_code,$message);
+        $verification_code = mt_rand(10000, 99999);      
 
 
 
@@ -1881,10 +1957,7 @@ public function jobStore2(Request $request)
     $receiverValue['verification_code']         = $verification_code; 
 
     $message='رمز التحقق التسليم الخاص بك هو';
-
-       // sendWhatsappMessage('+966',$request->receiver_number,$message);
-        //receiverVerificationCode('+966',$request->receiver_number,$verification_code,$message);
-
+ 
 
 
     JobReceiver::create($receiverValue);
@@ -2058,8 +2131,8 @@ public function jobUpdateManually(Request $request)
         
        
 
-        // $verification_code   = rand(9999,4);        
-    $verification_code   = 10001;
+         $verification_code   = rand(9999,4);        
+        //$verification_code   = 10001;
         // $message='رمز التحقق التسليم الخاص بك هو';
         // receiverVerificationCode('966' ,$request->receiver_number,$verification_code,$message);
 
@@ -2084,30 +2157,13 @@ public function jobUpdateManually(Request $request)
 
     $message='رمز التحقق التسليم الخاص بك هو';
 
-    // $ch = curl_init();
-// curl_setopt($ch, CURLOPT_URL, 'https://api.twilio.com/2010-04-01/Accounts/AC663f1295d524f6c9254420d1f0b4f96f/Messages.json');
-// curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-// curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-// curl_setopt($ch, CURLOPT_HTTPHEADER, [
-//     'Content-Type: application/x-www-form-urlencoded',
-// ]);
-// curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-// curl_setopt($ch, CURLOPT_USERPWD, 'AC663f1295d524f6c9254420d1f0b4f96f:250794cc5fbe94654319a744fe27a3f2');
-// curl_setopt($ch, CURLOPT_POSTFIELDS, 'To=whatsapp%3A%2B918146407156&From=whatsapp%3A%2B14155238886&Body=Your+appointment+is+coming+up+on+July+21+at+3PM');
-
-// $response = curl_exec($ch);
-// echo '<pre>'; print_r($response); die;
-// curl_close($ch);
-       sendWhatsappMessage('+966',$request->receiver_number,$message);
-        receiverVerificationCode('+966',$request->receiver_number,$verification_code,$message);
+     
 
 
 
     JobReceiver::where('id',$request->job_receiver_id)->update($receiverValue);
 
-
-
-
+ 
     if ($request->same_receiver=='no') {
 
         if (count($request->receivers_name)) {
@@ -2150,7 +2206,6 @@ public function jobUpdateManually(Request $request)
                 $receiversValue['verification_code']         = $verification_code; 
 
                 JobReceiver::where('id',$request->job_receiver_id)->update($receiversValue);
-
 
                 $verification_code = $verification_code+1;
             } 
@@ -2383,23 +2438,73 @@ public function manuallyPaymentFromAdmin(Request $request){
 
  public function updateActiveDate(Request $request)
  {
+    $datetime =date('Y-m-d,H:i:s',strtotime(str_replace('/','-',$request->datetime)));
 
+    ReceiveQuotes::where('id',$request->id)->update(['is_active_date'=>$datetime]);
 
-   $datetime =date('Y-m-d,H:i:s',strtotime(str_replace('/','-',$request->datetime)));
-
-
-   ReceiveQuotes::where('id',$request->id)->update(['is_active_date'=>$datetime]);
-
-   return $datetime;
-
-
-
-
-
-
-
+    return $datetime;  
 }
 
 
+function sendSMSs($phone_number){
+    try{  
+        
+$message_body ="
+تم ارسال طلب حمولة والتفاصيل في حسابك في عربات
+
+New job received. Details are in your account in Arabat.
+
+نئی نوکری مل گئی۔ تفصیلات عربات میں آپ کے اکاؤنٹ میں موجود ہیں۔
+
+عربات";
+
+        $apiUrl = 'https://api.taqnyat.sa/v1/messages';
+        $accessToken = '475b33120697346bd743efb7e311993f';
+    
+        $headers = [
+            'Authorization: Bearer ' . $accessToken,
+            'Content-Type: application/json',
+        ];
+    
+        $data = [
+            'recipients' => [$phone_number],
+            'body' => $message_body,
+            'sender' => 'Arabat.sa',
+        ];
+    
+        \Log::info([
+            'job_create_otp' => $data
+        ]);
+    
+        $ch = curl_init($apiUrl);
+    
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    
+        $response = curl_exec($ch);
+    
+        if (curl_errno($ch)) {
+            echo 'Error: ' . curl_error($ch);
+        }
+    
+        curl_close($ch);
+    
+        \Log::info([
+            'user_resend_otp_res_ok--' => $response
+        ]);
+    
+    
+    }catch(\Exception $e){
+        \Log::info([
+            'error occured in sending sms for forget pass' => $e->getMessage().' on line no '.$e->getLine().' in file '.$e->getFile()
+        ]);
+    }
+    }
+
+
+
+   
 
 }

@@ -21,6 +21,9 @@ use App\Models\Booking;
 use App\Models\JobReceiver;
 use App\Models\ReceiveQuotes;
 use App\Models\Pricing;
+use App\Models\JobsPaymentDetails;
+
+
 class ReportController extends Controller
 {
     //
@@ -83,41 +86,72 @@ class ReportController extends Controller
 
             $userId     =        $request->user_id;
             $userType   =        $request->type;
-
+            
             switch ($request->input('action')) { 
 
-                 case 'userQuations':
+                case 'userQuations':
                     return Excel::download(new ExportUserQuations($userId,$userType), 'User_Quations.xlsx');
                     break;
 
                     case 'userInvoice':
                     // return PDF::download(new ExportUserInvoice($userId,$userType), 'User_Invoice.xlsx');
-                    $getBookings =Booking::where('user_id',$userId)->where('payment_status','success')->with('user','driver','job')->get();
-
+                    $getBookings =Booking::where('user_id',$userId)->where('payment_status','success')->where('status','service_completed')->with('user','driver','job')->get();
         
                         $data=[];
-                        foreach($getBookings as $getBooking){
-                             
+                        foreach($getBookings as $getBooking){                             
                             $jobReceivers =JobReceiver::with('DestinationAddres')->where('job_id',$getBooking->job_id)->get();
 
                             $pricing    =   Pricing::first();
-                            $commission=(($getBooking->quote_amount*$pricing->online_payment_discount)/100)*(1+$pricing->tax/100); 
+                            
+                            // $commission=(($getBooking->quote_amount*$pricing->online_payment_discount)/100)*(1+$pricing->tax/100); 
 
-                            $checkUserCommission = User::select('commission')->where('id',$getBooking->user_id)->first();
+                            // $checkUserCommission = User::select('commission')->where('id',$getBooking->user_id)->first();
 
-                            if(!empty($checkUserCommission)){
-                                $userCommission =$checkUserCommission->commission;
+                            // if(!empty($checkUserCommission)){
+                            //     $userCommission =$checkUserCommission->commission;
 
-                                if($userCommission!='' && $userCommission!=null){
+                            //     if($userCommission!='' && $userCommission!=null){
                                     
-                                    $commission=(($getBooking->quote_amount*$userCommission)/100)*(1+$pricing->tax/100);
+                            //         $commission=(($getBooking->quote_amount*$userCommission)/100)*(1+$pricing->tax/100);
 
+                            //     }
+                            // }
+
+
+                            $commission=(($getBooking->quote_amount*$pricing->online_payment_discount)/100); 
+
+                            $tax = $pricing->tax;
+
+                                $checkUserCommission = User::select('commission')->where('id',$getBooking->user_id)->first();
+
+                                if(!empty($checkUserCommission)){
+                                    $userCommission =$checkUserCommission->commission;
+
+                                    if($userCommission!='' && $userCommission!=null){
+                                        
+                                        //$commission=(($getBooking->quote_amount*$userCommission)/100)*(1+$pricing->tax/100); //code commented by govind 20-jun 2024
+                                        $commission=(($getBooking->quote_amount*$userCommission)/100);
+                                    //  $tax = $userCommission;
+                                    } 
                                 }
-                            }
 
 
-                               $title=$getBooking->job->other;
-                 
+                            $total_amount_tax = $commission;           
+
+                            // $total_amount_without_tax =$total_amount_tax/(1+($tax/100)); //code commented by govind 20-jun 2024
+                            $total_amount_without_tax =($total_amount_tax*$tax)/100;
+                
+                            //$tax_price = round($total_amount_tax-$total_amount_without_tax,2); //code commented by govind 20-jun 2024
+                            $tax_price =$total_amount_without_tax;
+ 
+                            if($getBooking->job->product->name=='Other') {
+
+                                $title=$getBooking->job->other;                    
+                    
+                            }else{
+                                $title=$request->type == 2?$getBooking->job->product->arabic_name:$getBooking->job->product->name;
+                    
+                            }                
 
                             $data[]=[
                                 'book_id'      =>$getBooking->book_id,
@@ -150,6 +184,7 @@ class ReportController extends Controller
                                     'job_id'              =>@$getBooking->job->job_ID,
                                     'schedule_date'       =>@$getBooking->job->schedule_date,
                                     'schedule_time'       =>@$getBooking->job->schedule_time,
+                                    'vehicle_type'        =>@$getBooking->vehicle_name,
                                     'pick_up_address'     =>@$getBooking->job->pick_up_address,
                                     'city'                =>@$getBooking->pickupSubRegion->name,
                                     'total_goods_weight'  =>@$getBooking->job->total_goods_weight,
@@ -162,7 +197,7 @@ class ReportController extends Controller
                                 'tota'=>[
                                     'sub_amount'            =>@$getBooking->quote_amount,
                                     'discount'              =>@$getBooking->discount,
-                                    'tax_price'             =>@$getBooking->tax_price,
+                                    'tax_price'             =>@$tax_price,
                                     'booking_fee'           =>@$getBooking->booking_fee,
                                     'commssion'             =>@$commission,
                                     'penaltiy_amount'       =>@$getBooking->penaltiy_amount,
@@ -171,155 +206,227 @@ class ReportController extends Controller
                             ];
                             }
                         
-                             
                         $pdf = PDF::loadView('reports.invoice', compact('data'));
-                        // $path = public_path('pdf/');      
-                        // $fileName =  time().'.'. 'pdf' ;
-                        // $pdf->save($path . '/' . $fileName);
-
-                        // $pdf = public_path('pdf/'.$fileName);
+                        
                         return $pdf->download('User_Invoices.pdf');
-                        // return $pdf; 
-                        // return view('reports.invoice',compact('data'));
+                      
+                       // return view('reports.invoice',compact('data'));
                     break;
 
             } 
     }
 
 
-public function downloadTransporterQuationInvoice(Request $request){
+    public function downloadTransporterQuationInvoice(Request $request){
 
-            $userId     =        $request->transporter_id;
-            $userType   =        $request->type;
-
-
-            switch ($request->input('action')) { 
-
-                 case 'transporterQuations':
-                    return Excel::download(new ExportTransporterQuations($userId,$userType), 'Transporter_Quations.xlsx');
-                    break;
-
-                case 'transporterInvoice':
-                    // return Excel::download(new ExportUserQuations($userId,$userType), 'User_Quations.xlsx');
-
-                
-                
-                $driver      =   User::where('parent_id',$userId)->pluck('id');
-                
-                $getBookings =Booking::whereIN('driver_id',$driver)->get();
-                // echo '<pre>';print_r($driver); die;
-        
-                        $data=[];
-                        foreach($getBookings as $getBooking){
-                             
-                            $jobReceivers =JobReceiver::with('DestinationAddres')->where('job_id',$getBooking->job_id)->get();
-
-                            $pricing    =   Pricing::first();
-                            $commission=(($getBooking->quote_amount*$pricing->commission)/100)*(1+$pricing->tax/100); 
-
-                            $checkUserCommission = User::select('commission')->where('id',$getBooking->user_id)->first();
-
-                            if(!empty($checkUserCommission)){
-                                $userCommission =$checkUserCommission->commission;
-
-                                if($userCommission!='' && $userCommission!=null){
-                                    
-                                    $commission=(($getBooking->quote_amount*$userCommission)/100)*(1+$pricing->tax/100);
-
-                                }
-                            }
+                $userId     =        $request->transporter_id;
+                $userType   =        $request->type;
 
 
-                               $title=$getBooking->job->other;
-                 
+                switch ($request->input('action')) { 
 
-                            $data[]=[
-                                'book_id'      =>$getBooking->book_id,
-                                'booked_on'    =>$getBooking->booked_on,
-                                'invoice_no'   =>$getBooking->invoice_no,
-                                'booking_status' =>$getBooking->status,
-                                    //'invoice_no'   => 'invoice-'.date('Yms').$getBooking->id,
-                                'user'=>[
-                                    'name'                =>@$getBooking->user->name,
-                                    'email'               =>@$getBooking->user->email, 
-                                    'phone_number'        =>@$getBooking->user->country_code.@$getBooking->user->phone_number,
-                                    'city'                =>@$getBooking->user->city, 
-                                ],
+                    case 'transporterQuations':
+                        return Excel::download(new ExportTransporterQuations($userId,$userType), 'Transporter_Quations.xlsx');
+                        break;
 
-                                'transporter'=>[
-                                    "name"=>@$getBooking->driver->transporter->name,
-                                    "pta_license_number"=>@$getBooking->driver->transporter->transporterDetails->pta_license_number,
+                    case 'transporterInvoice':
+                        // return Excel::download(new ExportUserQuations($userId,$userType), 'User_Quations.xlsx');
 
-                                ],
-
-                                'driver'=>[
-                                    'name'                =>@$getBooking->driver->name,
-                                    'email'               =>@$getBooking->driver->email,
-                                    'email'               =>@$getBooking->driver->email,
-                                    'phone_number'        =>@$getBooking->driver->country_code.@$getBooking->driver->phone_number,
-                                    'city'                =>@$getBooking->driver->city,
-                                ], 
-                                'job'=>[
-                                    'title'               =>@$title, 
-                                    'job_id'              =>@$getBooking->job->job_ID,
-                                    'schedule_date'       =>@$getBooking->job->schedule_date,
-                                    'schedule_time'       =>@$getBooking->job->schedule_time,
-                                    'pick_up_address'     =>@$getBooking->job->pick_up_address,
-                                    'city'                =>@$getBooking->pickupSubRegion->name,
-                                    'total_goods_weight'  =>@$getBooking->job->total_goods_weight,
-                                    'description_of_goods'=>@$getBooking->job->description_of_goods,
-                                    'number_of_items'     =>@$getBooking->job->number_of_items, 
-                                    'sub_amount'          =>@$getBooking->quote_amount,
-                                    'status'              =>@$getBooking->job->status,
-                                ],
-
-                                'tota'=>[
-                                    'sub_amount'            =>@$getBooking->quote_amount,
-                                    'discount'              =>@$getBooking->discount,
-                                    'tax_price'             =>@$getBooking->tax_price,
-                                    'booking_fee'           =>@$getBooking->booking_fee,
-                                    'commssion'             =>@$commission,
-                                    'penaltiy_amount'       =>@$getBooking->penaltiy_amount,
-                                ],
-                                'jobReceivers' =>$jobReceivers
-                            ];
-                            }
-                        
-                             
-                        $pdf = PDF::loadView('reports.invoice', compact('data'));
-                        // $path = public_path('pdf/');      
-                        // $fileName =  time().'.'. 'pdf' ;
-                        // $pdf->save($path . '/' . $fileName);
-
-                        // $pdf = public_path('pdf/'.$fileName);
-                        return $pdf->download('Transporter_Invoices.pdf'); 
                     
-                    break;
+                    
+                    $driver      =   User::where('parent_id',$userId)->pluck('id');
+                    
+                    $getBookings =Booking::whereIN('driver_id',$driver)->where('status','service_completed')->where('payment_status','success')->get();
+                    // echo '<pre>';print_r($driver); die;
+            
+                            $data=[];
+                            foreach($getBookings as $getBooking){
+                                
+                                $jobReceivers =JobReceiver::with('DestinationAddres')->where('job_id',$getBooking->job_id)->get();
+
+                                $pricing    =   Pricing::first();
+
+
+                                // $commission=(($getBooking->quote_amount*$pricing->commission)/100)*(1+$pricing->tax/100); 
+
+                                // $checkUserCommission = User::select('commission')->where('id',$getBooking->user_id)->first();
+
+                                // if(!empty($checkUserCommission)){
+                                //     $userCommission =$checkUserCommission->commission;
+
+                                //     if($userCommission!='' && $userCommission!=null){
+                                        
+                                //         $commission=(($getBooking->quote_amount*$userCommission)/100)*(1+$pricing->tax/100);
+
+                                //     }
+                                // }
+
+
+                                $commission=(($getBooking->quote_amount*$pricing->commission)/100); 
+
+                                $tax = $pricing->tax;
+
+                                $checkUserCommission = User::where('id',$getBooking->driver_id)->first();
+
+                                if(!empty($checkUserCommission->transporter)){
+                                    $userCommission =@$checkUserCommission->transporter->commission;
+
+                                    if($userCommission!='' && $userCommission!=null){
+                                        
+                                        //$commission=(($getBooking->quote_amount*$userCommission)/100)*(1+$pricing->tax/100); //code commented by govind 20-jun 2024
+                                        $commission=(($getBooking->quote_amount*$userCommission)/100);
+                                    // $tax = $userCommission; //code commented by govind 20-jun 2024
+                                    } 
+                                }
+
+
+
+                                $total_amount_tax = $commission;           
+
+                                // $total_amount_without_tax =$total_amount_tax/(1+($tax/100)); //code commented by govind 20-jun 2024
+                                 $total_amount_without_tax =($total_amount_tax*$tax)/100;
+                         
+                                // $tax_price = round($total_amount_tax-$total_amount_without_tax,2); //code commented by govind 20-jun 2024
+                                 $tax_price =$total_amount_without_tax;
+
+
+                                
+
+ 
+                                if($getBooking->job->product->name=='Other') {
+
+                                    $title=$getBooking->job->other;                    
+                        
+                                }else{
+                                    $title=$request->type == 2?$getBooking->job->product->arabic_name:$getBooking->job->product->name;
+                        
+                                } 
+                    
+
+                                $data[]=[
+                                    'book_id'      =>$getBooking->book_id,
+                                    'booked_on'    =>$getBooking->booked_on,
+                                    'invoice_no'   =>$getBooking->invoice_no,
+                                    'booking_status' =>$getBooking->status,
+                                        //'invoice_no'   => 'invoice-'.date('Yms').$getBooking->id,
+                                    'user'=>[
+                                        'name'                =>@$getBooking->user->name,
+                                        'email'               =>@$getBooking->user->email, 
+                                        'phone_number'        =>@$getBooking->user->country_code.@$getBooking->user->phone_number,
+                                        'city'                =>@$getBooking->user->city, 
+                                    ],
+
+                                    'transporter'=>[
+                                        "name"=>@$getBooking->driver->transporter->name,
+                                        "pta_license_number"=>@$getBooking->driver->transporter->transporterDetails->pta_license_number,
+
+                                    ],
+
+                                    'driver'=>[
+                                        'name'                =>@$getBooking->driver->name,
+                                        'email'               =>@$getBooking->driver->email,
+                                        'email'               =>@$getBooking->driver->email,
+                                        'phone_number'        =>@$getBooking->driver->country_code.@$getBooking->driver->phone_number,
+                                        'city'                =>@$getBooking->driver->city,
+                                    ], 
+                                    'job'=>[
+                                        'title'               =>@$title, 
+                                        'job_id'              =>@$getBooking->job->job_ID,
+                                        'schedule_date'       =>@$getBooking->job->schedule_date,
+                                        'schedule_time'       =>@$getBooking->job->schedule_time,
+                                        'pick_up_address'     =>@$getBooking->job->pick_up_address,
+                                        'city'                =>@$getBooking->pickupSubRegion->name,
+                                        'total_goods_weight'  =>@$getBooking->job->total_goods_weight,
+                                        'description_of_goods'=>@$getBooking->job->description_of_goods,
+                                        'number_of_items'     =>@$getBooking->job->number_of_items, 
+                                        'sub_amount'          =>@$getBooking->quote_amount,
+                                        'status'              =>@$getBooking->job->status,
+                                        'vehicle_type'        =>@$getBooking->vehicle_name,
+                                    ],
+
+                                    'tota'=>[
+                                        'sub_amount'            =>@$getBooking->quote_amount,
+                                        'discount'              =>@$getBooking->discount,
+                                        'tax_price'             =>@$tax_price,
+                                        'booking_fee'           =>@$getBooking->booking_fee,
+                                        'commssion'             =>@$commission,
+                                        'penaltiy_amount'       =>@$getBooking->penaltiy_amount,
+                                    ],
+                                    'jobReceivers' =>$jobReceivers
+                                ];
+                                }
+                            
+                                
+                            $pdf = PDF::loadView('reports.invoice', compact('data'));
+                            // $path = public_path('pdf/');      
+                            // $fileName =  time().'.'. 'pdf' ;
+                            // $pdf->save($path . '/' . $fileName);
+
+                            // $pdf = public_path('pdf/'.$fileName);
+                            return $pdf->download('Transporter_Invoices.pdf'); 
+                        
+                        break;
 
 
 
 
 
-            }
+                }
 
-}
+    }
 
 
 public function downloadUserInvoice(Request $request){
+
+
+
+
+
+
 
     // echo '<pre>'; print_r($request->all()); die;
     $jobDetails = Job::where('id',$request->job_id)->first();
     $productTypeDetails = Product::where('id',$jobDetails->product_id)->first();
     // echo '<pre>'; print_r($productTypeDetails->name); die; 
     if($request->type=='transporter'){
+
+
+        $datas = [
+            'job_id' => $request->job_id,   
+            'transpoeter_base_price' =>  $request->transpoeter_base_price,
+            'transpoeter_tax' =>  $request->transpoeter_tax,
+            'transpoeter_commission' =>  $request->transpoeter_commission,
+            'transpoeter_language_code' =>  $request->language_code,
+            'transpoeter_type' =>  $request->type,
+        ];
+        
+     
+        
         
     $updateBooking=DB::table('bookings')->where('job_id',$request->job_id)->update(['quote_amount'=>$request->transpoeter_base_price,'tax_price'=>$request->transpoeter_tax,'booking_fee'=>$request->transpoeter_base_price,'transporter_base_price'=>$request->transpoeter_base_price,'transporter_tax'=>$request->transpoeter_tax,'transporter_commission'=>$request->transpoeter_commission]);
     }else{
+
+        $datas = [
+            'job_id' => $request->job_id,
+            'user_base_price' =>  $request->user_base_price,
+            'user_tax' =>  $request->user_tax,
+            'user_commission' =>  $request->user_commission,
+            'user_language_code' =>  $request->language_code,
+            'user_type' =>  $request->type, 
+        ];
+
+
 
     $updateBooking=DB::table('bookings')->where('job_id',$request->job_id)->update(['quote_amount'=>$request->user_base_price,'tax_price'=>$request->user_tax,'booking_fee'=>$request->user_base_price,'user_base_price'=>$request->user_base_price,'user_tax'=>$request->user_tax,'user_commission'=>$request->user_commission]);
 
     }
     
+    JobsPaymentDetails::updateOrCreate(
+        ['job_id' =>  $request->job_id],  
+        $datas                           
+    );
+
+
     $getBooking =Booking::where('job_id',$request->job_id)->with('user','driver','job')->first(); 
     // echo '<pre>'; print_r($getBooking); die;
     if($request->type=='transporter'){

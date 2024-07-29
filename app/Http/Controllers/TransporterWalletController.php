@@ -26,11 +26,11 @@ class TransporterWalletController extends Controller
         $tax =$getPricing->tax;
         $transporteCommission =$getPricing->commission;
 
-        $transporters            =   User::where('role_id',Config::get('variables.Transporter'))->get();
+        $transporters           =   User::where('role_id',Config::get('variables.Transporter'))->get();
 
-        $quote_amount            =Booking::where('status','service_completed')->sum('quote_amount');           
+        $quote_amount           =   Booking::where('status','service_completed')->sum('quote_amount');           
 
-        $paid_amount               =    TransporterWallet::sum('amount');
+        $paid_amount            =    TransporterWallet::sum('amount');
 
         $paytax =round($quote_amount-($quote_amount/(1+$tax/100)),2);
 
@@ -41,9 +41,7 @@ class TransporterWalletController extends Controller
         $remaining_amount  =    $totalAmount-($paid_amount);
 
         // echo $quote_amount.'///'.$commission.'///'.$paid_amount; die;
-
         
-
         return view('wallets.index',compact('totalAmount', 'remaining_amount','transporters','commission','paid_amount'));
     }
 

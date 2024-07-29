@@ -67,7 +67,8 @@
                       <th >Sr.No.</th>
                       <th>{{ __('adminlte::adminlte.transporterId') }}</th>
                       <th>{{ __('adminlte::adminlte.email') }}</th>
-                      <th>{{ __('adminlte::adminlte.name') }}</th>                   
+                      <th>{{ __('adminlte::adminlte.name') }}</th>     
+                      <th>{{ __('adminlte::adminlte.phone_number') }}</th>                  
                       <th>Status</th>
                       <th>Approvel Status</th>
                       <th>{{ __('adminlte::adminlte.actions') }}</th>
@@ -189,6 +190,8 @@
     {data: 'unique_ID', name: 'unique_ID'},
     {data: 'email', name: 'email'},
     {data: 'name', name: 'name'}, 
+    {data: 'phone_number', name: 'phone_number'}, 
+
     {data: 'status', name: 'status'},
     {data: 'is_approve', name: 'is_approve'},
     {data: 'action', name: 'action', orderable: false, searchable: false},

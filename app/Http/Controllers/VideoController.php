@@ -28,8 +28,8 @@ class VideoController extends Controller
      */
     public function create()
     {
-       return view('Video.create');
-   }
+        return view('Video.create');
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -40,16 +40,13 @@ class VideoController extends Controller
     public function store(Request $request)
     {
 
-
         $data['video_title']=$request->video_title;
         $data['arabic_video_title']=$request->arabic_video_title;
-
 
         if($request->hasFile('video')) {
             $video              = Storage::disk('public')->putFile('video',$request->video);
             $data['video']      ='storage/'.$video;
         }  
-        
 
         Video::create($data); 
         return redirect()->route('video.index')->with('success','Video uploaded successfully ');
@@ -90,12 +87,12 @@ class VideoController extends Controller
     {
         $data['video_title']=$request->video_title;
         $data['arabic_video_title']=$request->arabic_video_title;
-
-
+ 
         if($request->hasFile('video')) {
             $video              = Storage::disk('public')->putFile('video',$request->video);
             $data['video']      ='storage/'.$video;
-        }  
+        }   
+     
         Video::where('id',$id)->update($data);
         return redirect()->route('video.index')->with('success','Vido updated successfully');
     }

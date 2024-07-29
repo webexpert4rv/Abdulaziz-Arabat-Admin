@@ -316,32 +316,33 @@ i.clock.gj-icon {
                         </form>
                         <?php $paymentStatus='none'; if(!empty($_GET['job_id'])){$paymentStatus='flex';}else{$paymentStatus='none';} ?>
                          <div class="row" style="display:<?php echo $paymentStatus; ?>">
-                                  <h4>Payment Details</h4>
-                              
+                                  <h4>Payment Details</h4> 
+  
+ 
                                 <div class="col-md-6">
                                   <form method="post" action="{{ route('download-user-invoice',['type'=>'user']) }}" enctype="multipart/form-data">
                                     <input autocomplete="off" type="hidden" id="job_id" value="{{$getJobData[0]['id']}}"  name="job_id" >
                                     <div class="form-group form-group-width w-100">
                                       <label for="email">Base Price</label> 
-                                      <input autocomplete="off" type="number" required class="form-control input-dash-log" id="user_base_price" name="user_base_price" placeholder="Base Price">
+                                      <input autocomplete="off" value="{{@$jobsPaymentDetails->user_base_price }}" type="number" required class="form-control input-dash-log" id="user_base_price" name="user_base_price" placeholder="Base Price">
                                     </div>  
                                     <div class="form-group form-group-width w-100">
                                       <label for="email">Tax Calculate</label> 
-                                      <input autocomplete="off" type="text" minlength="1" maxlength="2" onkeypress="return isNumberKey(event)" required class="form-control input-dash-log" id="user_tax" name="user_tax" placeholder="Tax Calculate">
+                                      <input autocomplete="off" type="text" value="{{@$jobsPaymentDetails->user_tax }}" minlength="1" maxlength="2" onkeypress="return isNumberKey(event)" required class="form-control input-dash-log" id="user_tax" name="user_tax" placeholder="Tax Calculate">
                                     </div> 
                                      <div class="form-group form-group-width w-100">
                                       <label for="email">Commission</label> 
-                                      <input autocomplete="off" type="text" minlength="1" maxlength="2" onkeypress="return isNumberKey(event)" required class="form-control input-dash-log" id="user_commission" name="user_commission" placeholder="Commission">
+                                      <input autocomplete="off" type="text" value="{{@$jobsPaymentDetails->user_commission }}" minlength="1" maxlength="2" onkeypress="return isNumberKey(event)" required class="form-control input-dash-log" id="user_commission" name="user_commission" placeholder="Commission">
                                     </div> 
                                     <div class="form-group form-group-width w-100">
                                       <label for="email">Select Language</label> 
                                       <select name="language_code" class="form-control input-dash-log">
-                                        <option value="en">English</option>
-                                        <option value="ar">Arabic</option>
+                                        <option value="en" {{ @$jobsPaymentDetails->user_language_code == "en" ? 'selected' : '' }}>English</option>
+                                        <option value="ar" {{ @$jobsPaymentDetails->user_language_code == "ar" ? 'selected' : '' }}>Arabic</option>
                                       </select>
                                     </div>
                                     <div class="form-group form-group-width w-100">
-                                      <button type="submit" id="download_user_invoice" class="btn btn-primary">Download Invoice</button>
+                                      <button type="submit" id="download_user_invoice" class="btn btn-primary">Save And Download Invoice</button>
                                     </div> 
                                     </form>                   
                                   </div>
@@ -354,25 +355,25 @@ i.clock.gj-icon {
                                       <input autocomplete="off" type="hidden" id="job_id" value="{{$getJobData[0]['id']}}"  name="job_id" >
                                     <div class="form-group form-group-width w-100">
                                       <label for="email">Base Price for User</label> 
-                                      <input autocomplete="off" type="number" required class="form-control input-dash-log" id="transpoeter_base_price" name="transpoeter_base_price" placeholder="Base Price">
+                                      <input autocomplete="off" value="{{@$jobsPaymentDetails->transpoeter_base_price }}" type="number" required class="form-control input-dash-log" id="transpoeter_base_price" name="transpoeter_base_price" placeholder="Base Price">
                                     </div>
                                      <div class="form-group form-group-width w-100">
                                       <label for="email">Tax Calculate</label> 
-                                      <input autocomplete="off" type="text" minlength="1" maxlength="2" onkeypress="return isNumberKey(event)" required class="form-control input-dash-log" id="transpoeter_tax" name="transpoeter_tax" placeholder="Tax Calculate">
+                                      <input autocomplete="off" value="{{@$jobsPaymentDetails->transpoeter_tax }}" type="text" minlength="1" maxlength="2" onkeypress="return isNumberKey(event)" required class="form-control input-dash-log" id="transpoeter_tax" name="transpoeter_tax" placeholder="Tax Calculate">
                                     </div> 
                                     <div class="form-group form-group-width w-100">
                                       <label for="email">Commission for Transporter</label> 
-                                      <input autocomplete="off" type="text" minlength="1" maxlength="2" onkeypress="return isNumberKey(event)" required class="form-control input-dash-log" id="transpoeter_commission" name="transpoeter_commission" placeholder="Commission">
+                                      <input autocomplete="off" value="{{@$jobsPaymentDetails->transpoeter_commission }}" type="text" minlength="1" maxlength="2" onkeypress="return isNumberKey(event)" required class="form-control input-dash-log" id="transpoeter_commission" name="transpoeter_commission" placeholder="Commission">
                                     </div>
                                     <div class="form-group form-group-width w-100">
                                       <label for="email">Select Language</label> 
                                       <select name="language_code" class="form-control input-dash-log">
-                                        <option value="en">English</option>
-                                        <option value="ar">Arabic</option>
+                                      <option value="en" {{ @$jobsPaymentDetails->transpoeter_language_code == "en" ? 'selected' : '' }}>English</option>
+                                        <option value="ar" {{ @$jobsPaymentDetails->transpoeter_language_code == "ar" ? 'selected' : '' }}>Arabic</option>
                                       </select>
                                     </div>
                                      <div class="form-group form-group-width w-100"> 
-                                      <button type="submit" id="download_transporter_invoice" class="btn btn-primary">Download Invoice</button>
+                                      <button type="submit" id="download_transporter_invoice" class="btn btn-primary">Save And Download Invoice</button>
                                     </div> 
                                   </form>                     
                                   </div>

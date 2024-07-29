@@ -16,40 +16,7 @@
               <h3>Update Information Messages</h3>
               <!-- <a href="" class="show-advance-options">Advance Options <i class="fa fa-caret-down"></i></a> -->
             </div>
-            <div class="card-body pb-0 mb-2 card_inner">
-              <div class="text-right mb-3">
-                  <div class="advance-options" style="display: none;">
-                    <div class="title">
-                        <h5><i class="fa fa-filter mr-1"></i>Apply Search Filter</h5>
-                    </div>
-                    <div class="left_option">
-                        <div class="left_inner">
-                          <h6>Select Status</h6>
-                          <div class="date-picker-new">
-                              <div class="apply_reset_btn">
-                                <div class="button_input_wrap">
-                                    <div class="form-group">
-                                      <select class="form-control" id="filter">  
-                                        <option value="" selected="" disabled="">Select</option>
-                                        @foreach(\App\Models\ContactUs::status() as $status)
-                                        <option value="{{strtolower($status)}}">{{$status}}</option>
-                                        @endforeach                       
-                                        
-                                      </select>
-                                    </div>
-                                  </div>
-                                <!-- <button class="btn btn-primary apply apply-filter mr-1"><i class="fas fa-paper-plane mr-2"></i>Apply</button> -->
-                                <button class="btn btn-primary reset-button"><i class="fas fa-sync-alt mr-2"></i>Reset</button>                          
-                              </div>
-                          </div>
-                        </div>
-                        <div class="advance_options_btn" style="display: none;">  
-                          <button class="btn btn-primary export-bulk-invoices"><i class="fas fa-download mr-2"></i>Download bulk invoices</button>
-                        </div>
-                    </div>
-                  </div>
-              </div>
-            </div>
+            
 
             <div class="card-body">
               <div class="table-responsive">
@@ -61,8 +28,9 @@
                     <th>Old Email</th>
                      <th>New Mobile Number</th>
                     <th>New Email</th>
-
                     <th>Description</th>
+                    <th>{{__('adminlte::adminlte.status') }}</th> 
+                    <th>Date</th>
                     <th>Actions</th>
                 
                   </tr>
@@ -75,17 +43,36 @@
                       <td>{{ $updateinformationlist[$i]->old_email }}</td>
                       <td>{{ $updateinformationlist[$i]->mobile_number }}</td>
                       <td>{{ $updateinformationlist[$i]->email }}</td>
+                      
 
                       <td>{{ $updateinformationlist[$i]->description }}</td>
+
+                      <td>{{ $updateinformationlist[$i]->is_updated==1?'Updated':'Pending ' }}</td>
+                      <td>{{ $updateinformationlist[$i]->created_at->format('d-m-Y') }}</td>
+
                       <td>
-                        @can('view_feedback')
+                      @if($updateinformationlist[$i]->is_updated==0)
+                      <a class="nav-link" href="javascript:void(0)" onclick="approvePayments(this,{{$updateinformationlist[$i]->user_id}})" 
+                      style="background-color: blueviolet; color: #fff; padding: 6px 10px 8px 7px;">
+                                                    <span class="button-text">Pending</span>
+                                                    <span class="loader" style="display: none;"></span>
+                                                </a>
+                                                @else
+
+                                                <a class="nav-link" href="javascript:void(0)"   style="background-color: #000000; color: #fff; padding: 6px 10px 8px 7px;">
+                                                    <span class="button-text">Updated</span>
+                                                </a>
+                                                 
+                                                @endif
+
+                        <!-- @can('view_feedback')
                         <a href="{{ route('view_update_information_list_message', ['id' => $updateinformationlist[$i]->id]) }}" title="View"><i class="text-info fa fa-eye"></i></a>
                       
-                        @endcan
+                        @endcan -->
                       
-                        @can('reply_feedback')
+                        <!-- @can('reply_feedback')
                         <a href="{{route('update_info.reply1',$updateinformationlist[$i]->id)}}"><i class="fa fa-reply"></i></a>
-                        @endcan
+                        @endcan -->
                         
                       </td>
                     
@@ -124,104 +111,68 @@
 
   <!-- update status -->
   <script type="text/javascript">
-    $(document).on('change','#status',function(){
 
-      var id = $(this).attr('data-id');
-      var status = $(this).val();
+function approvePayments(button,user_id) {
 
-      $.ajax({
-        url: "{{ route('update_status') }}",
-        type: 'POST',
-        data: {
-          id : id,
-          status : status
+Swal.fire({
+    title: "Are you sure",
+    text: "You want to Update information this user",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: "Yes it",
+}).then((result) => {
+    
+    if (result.isConfirmed) {
+
+var loader = button.querySelector('.loader');
+var buttonText = button.querySelector('.button-text');
+
+buttonText.textContent = 'Processing...';
+loader.style.display = 'inline-block';
+button.onclick = null;
+    $.ajax({
+        type:'POST',
+        url:"{{route('user_update_information')}}",
+        data:{
+        "_token"      : "{{ csrf_token() }}", 
+        "user_id"    : user_id,
         },
-        dataType: "JSON",
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function(response) {
-          console.log("Response", response);
-          if(response.status) {
-            window.location.reload();
-          }
-          else {
-            console.log("FALSE");
-            setTimeout(() => {
-            alert("Something went wrong! Please try again.");
-            }, 500);
-          }
+        success:function(response){
+
+            if(response==1){
+                $('#remove'+user_id).hide();
+                Swal.fire({ 
+                text: "Information update successfully",
+                icon: "success", 
+                });
+                buttonText.textContent = 'Updated';
+                loader.style.display = 'none';
+                button.onclick = function() { approvePayments(button, user_id); };
+                window.location.reload();
+                
+            }else{
+                Swal.fire({ 
+                text: "Something went wrong.",
+                icon: "error", 
+                });
+            }
         }
-      });
-    })
+    });
 
+    }
+});
+
+}
+
+
+
+  
   </script>
   <!-- update status -->
 
-  <!-- filter by status -->
-  <script type="text/javascript">
-    $(document).on('change','#filter',function(){
-      var status = $(this).val();
-      console.log('filter status');
-      console.log(status);
-
-      $.ajax({
-        url: "{{ route('contact_us.filter') }}",
-        type: 'POST',
-        data: {
-          status : status
-        },
-        dataType: "JSON",
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function(response) {
-          console.log("Response", response);
-          if(response.status) {
-            $('#tbody').html(response.html);
-          }
-          else {
-            console.log("FALSE");
-            setTimeout(() => {
-            alert("Something went wrong! Please try again.");
-            }, 500);
-          }
-        }
-      });
-
-    })
-
-
-    $(document).on('click','.reset-button',function(){
-      // location.reload();
-      
-      $("#filter").val($("#filter option:first").val());
-
-      $.ajax({
-        url: "{{ route('contact_us.filter') }}",
-        type: 'POST',
-        data: {
-          reset : true
-        },
-        dataType: "JSON",
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function(response) {
-          console.log("Response", response);
-          if(response.status) {
-            $('#tbody').html(response.html);
-          }
-          else {
-            console.log("FALSE");
-            setTimeout(() => {
-            alert("Something went wrong! Please try again.");
-            }, 500);
-          }
-        }
-      });
-    })
-  </script>
+ 
 
   <script>
      $('body').on('click','.show-advance-options',function(e){

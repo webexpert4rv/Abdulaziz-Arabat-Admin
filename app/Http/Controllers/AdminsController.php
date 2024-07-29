@@ -56,7 +56,9 @@ class AdminsController extends Controller {
 	*/
 	public function adminsList(Request $request) {
 			$user=Auth::guard('admin')->user();
-			$adminsList = Admin::with('role')->orderBy('id','desc')->where('role_id','!=',1)->get();
+			$adminsList = Admin::with('role')->orderBy('id','desc')
+			//->where('role_id','!=',1)
+			->get();
 			return view('admins/admins_list', ['adminsList' => $adminsList,'admin_user'=>$user]);
 		
 	}
@@ -82,7 +84,9 @@ class AdminsController extends Controller {
 	*/
 	public function addAdmin(Request $request) {
 		
-			$roles = Role::orderBy('name')->where('id','!=',1)->where('role_type', 'admins')->get();
+			$roles = Role::orderBy('name')
+			//->where('id','!=',1)
+			->where('role_type', 'admins')->get();
 			
 			return view('admins/add_admin', ['roles' => $roles]);
 		

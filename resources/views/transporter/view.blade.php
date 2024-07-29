@@ -216,6 +216,7 @@ select.form-control {
                       <div class="col-sm-6">
                         <div class="form-group form-wrapper">
                           <label class="d-block w-100">{{ __('adminlte::adminlte.public_transport_authority_license') }}</label>
+                          <a target="_blank" href="{{ route('download.image', ['path' => $transporter->transporterDetails->public_transport_authority_license]) }}">Download</a>
                           <img class="pop" width="50%" data-type="image"   src="{{config('services.storage_image_path.web_path')}}/{{Optional($transporter->transporterDetails)->public_transport_authority_license}}">
                         </div>
                       </div>
@@ -224,6 +225,7 @@ select.form-control {
                       <div class="col-sm-6">
                         <div class="form-group form-wrapper">
                           <label>{{ __('adminlte::adminlte.commercial_registration') }}</label>
+                          <a target="_blank" href="{{ route('download.image', ['path' => $transporter->transporterDetails->commercial_registration]) }}">Download</a>
                           <img class="pop" width="50%" data-type="image"   src="{{config('services.storage_image_path.web_path')}}/{{Optional($transporter->transporterDetails)->commercial_registration}}">
                         </div>
                       </div>
@@ -232,6 +234,7 @@ select.form-control {
                       <div class="col-sm-6">
                         <div class="form-group form-wrapper">
                           <label>{{ __('adminlte::adminlte.vat_registration') }}</label>
+                          <a target="_blank" href="{{ route('download.image', ['path' => $transporter->transporterDetails->vat_registration]) }}">Download</a>
                           <img class="pop" width="50%" data-type="image"   src="{{config('services.storage_image_path.web_path')}}/{{Optional($transporter->transporterDetails)->vat_registration}}">
                         </div>
                       </div>
@@ -240,6 +243,7 @@ select.form-control {
                       <div class="col-sm-6">
                         <div class="form-group form-wrapper">
                           <label>{{ __('adminlte::adminlte.iban_details') }}</label>
+                          <a target="_blank" href="{{ route('download.image', ['path' => $transporter->transporterDetails->iban_details]) }}">Download</a>
                           <img class="pop" width="50%" data-type="image"   src="{{config('services.storage_image_path.web_path')}}/{{Optional($transporter->transporterDetails)->iban_details}}">
                         </div>
                       </div>
@@ -249,7 +253,7 @@ select.form-control {
                       @foreach($more_documents as $more_document)
                       <div class="col-sm-6">
                         <div class="form-group form-wrapper">
-
+                        <a target="_blank" href="{{ route('download.image', ['path' => $more_document->document]) }}">Download</a>
                           <img class="pop" width="50%" data-type="image"   src="{{config('services.storage_image_path.web_path')}}/{{$more_document->document}}">
                         </div>
                       </div>
@@ -866,39 +870,21 @@ select.form-control {
       headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
       },
-      success: function(response) {
-        console.log(response.data);
-       // console.log(response.moreimage);
-
-
+      success: function(response) { 
  
-
-
-
+        
         var vehicle_type =response.data.vehicle_details.vehicle_type.name+'('+response.data.vehicle_details.vehicle_type.max_load +' '+response.data.vehicle_details.vehicle_type.max_load_unit +' , '+response.data.vehicle_details.vehicle_type.length +' '+response.data.vehicle_details.vehicle_type.unit +')';
-
-        console.log('vehicle_type =>' +vehicle_type);
-
-
+ 
         var mydate = new Date(response.data.vehicle_details.insurance_expiry_date);
 
         var expiry_date = mydate.getDate() + '/' + (mydate.getMonth()+ 1)  + '/' + mydate.getFullYear();
-
-
-
-
-
-
-
-
-
-
-
-
+   
+       
+      
         var html=`  
         <div class="tab-content">  
 
-
+ 
         <div id="section1" class="tab-pane fade in active"> 
         <div class="row">
         <div class="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-6">
@@ -950,14 +936,18 @@ select.form-control {
         <div class="col-sm-12"></div>
         <div class="col-sm-6 ">
         <div class="form-group form-wrapper">
-        <label >{{ __('adminlte::adminlte.driver_licence') }}<span class="text-danger">*</span></label>
-        <img width="50%"  class="pop1" data-type="image" src="{{config('services.storage_image_path.web_path')}}/${response.data.driver_details.driver_licence}">
+        <label >{{ __('adminlte::adminlte.driver_licence') }}<span class="text-danger">*</span></label> 
+
+        <a target="_blank" href="/admin/download-image/${response.data.driver_details.driver_licence}">Download</a>         
+
+        <img width="50%"  class="pop1" data-type="image" src="{{config('services.storage_image_path.web_path')}}/${response.data.driver_details.driver_licence}"   data-url="${response.data.driver_details.driver_licence}">
         </div>
         </div>
         <div class="col-sm-6">
         <div class="form-group form-wrapper">
-        <label>{{ __('adminlte::adminlte.verification_id') }}<span class="text-danger">*</span></label>
-        <img  class="pop1" width="50%" data-type="image" src="{{config('services.storage_image_path.web_path')}}/${response.data.driver_details.verification_id}">
+        <label>{{ __('adminlte::adminlte.verification_id') }}<span class="text-danger">*</span></label> 
+        <a target="_blank" href="/admin/download-image/${response.data.driver_details.verification_id}">Download</a> 
+        <img  class="pop1" width="50%" data-type="image" src="{{config('services.storage_image_path.web_path')}}/${response.data.driver_details.verification_id}" data-url="${response.data.driver_details.verification_id}">
         </div>
 
         </div> 
@@ -1017,18 +1007,21 @@ select.form-control {
         <div class="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-6 ">
         <div class="form-group form-wrapper">
         <label >{{ __('adminlte::adminlte.vehicle_insurance') }}<span class="text-danger">*</span></label>
+        <a target="_blank" href="/admin/download-image/${response.data.vehicle_details.insurance}">Download</a>  
         <img width="50%"  class="pop1" data-type="image" src="{{config('services.storage_image_path.web_path')}}/${response.data.vehicle_details.insurance}">
         </div>
         </div>
         <div class="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-6">
         <div class="form-group form-wrapper">
         <label>{{ __('adminlte::adminlte.vehicle_registration') }}<span class="text-danger">*</span></label>
+        <a target="_blank" href="/admin/download-image/${response.data.vehicle_details.vehicle_registration}">Download</a>  
         <img  class="pop1" width="50%" data-type="image" src="{{config('services.storage_image_path.web_path')}}/${response.data.vehicle_details.vehicle_registration}">
         </div>
         </div>
         <div class="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-6">
         <div class="form-group form-wrapper">
         <label>{{ __('adminlte::adminlte.pta_licence') }}<span class="text-danger">*</span></label>
+        <a target="_blank" href="/admin/download-image/${response.data.vehicle_details.Vehicle_PTA_License}">Download</a>  
         <img  class="pop1" width="50%" data-type="image" src="{{config('services.storage_image_path.web_path')}}/${response.data.vehicle_details.Vehicle_PTA_License}">
         </div>
         </div>
@@ -1040,6 +1033,14 @@ select.form-control {
         $('#exampleModal').modal('show');
         $(".pop1").click(function(){
           var data=  $(this).attr('data-type'); 
+          var image_name=  $(this).attr('data-url'); 
+ 
+          var download = '<a target="_blank" href="/admin/download-image/' + image_name + '">Download</a>';
+
+          
+
+          console.log("Download URL:", download);
+
           if(data=="image"){
             $('.imagepreview1').attr('src', $(this).attr('src'));
             $('.imagepreview1').show();

@@ -351,68 +351,67 @@ class TransporterController extends Controller
      */
     public function update(Request $request, $id)
     {
-     $user=User::find($id);
-     $data['name']              =     $request->name;
-     $data['role_id']           =     Config::get('variables.Transporter');
-     $data['email']             =     $request->email;
-     $data['phone_number']      =     $request->phone_number;
-     $data['country_code']      =     str_replace(str_replace(' ', '', $request->phone_number), '', $request->full); 
-     $data['password']          =     $request->password!=null?bcrypt($request->password):$user->password;
-     $data['token_type']        =     'web';
-     $data['created_by']        =     'self';
-     $data['account_type']      =      2;
-     $data['commission']        =     $request->commission;
-     $data['lat']               =     $request->lat;
-     $data['long']              =     $request->long;
-     $data['address']           =     $request->address;
-     $data['city']              =     $request->city;
-     $data['zip_code']          =     $request->zip_code;
-     $data['is_push_notifications']          =     $request->is_push_notifications;
-     $data['is_email_notifications']          =     $request->is_email_notifications;
+       
 
+        $user=User::find($id);
+        $data['name']              =     $request->name;
+        $data['role_id']           =     Config::get('variables.Transporter');
+        $data['email']             =     $request->email;
+        $data['phone_number']      =     $request->phone_number;
+        $data['country_code']      =     str_replace(str_replace(' ', '', $request->phone_number), '', $request->full); 
+        $data['password']          =     $request->password!=null?bcrypt($request->password):$user->password;
+        $data['token_type']        =     'web';
+        $data['created_by']        =     'self'; 
+        $data['commission']        =     $request->commission;
+        $data['lat']               =     $request->lat;
+        $data['long']              =     $request->long;
+        $data['address']           =     $request->address;
+        $data['city']              =     $request->city;
+        $data['zip_code']          =     $request->zip_code;
+        $data['is_push_notifications']          =     $request->is_push_notifications;
+        $data['is_email_notifications']          =     $request->is_email_notifications;
 
-     if ($request->hasFile('profile_image')) {
-        $image              = Storage::disk('public')->putFile('ProfileImage',$request->profile_image);
-        $data['profile_image']      ='storage/'.$image;
+        if ($request->hasFile('profile_image')) {
+            $image              = Storage::disk('public')->putFile('ProfileImage',$request->profile_image);
+            $data['profile_image']      ='storage/'.$image;
+        }
+     
+        $dataw= User::where('id',$id)->update($data);
+       
+        $data1['description']                   =     $request->description;
+
+        if ($request->hasFile('public_transport_authority_license')) {
+        $image            = Storage::disk('public')->putFile('public_transport_authority_license',$request->public_transport_authority_license);
+        $data1['public_transport_authority_license']  ='storage/'.$image;
+    }   
+
+    if ($request->hasFile('commercial_registration')) {
+        $image            = Storage::disk('public')->putFile('commercial_registration',$request->commercial_registration);
+        $data1['commercial_registration']  ='storage/'.$image;
+    }   
+    if ($request->hasFile('vat_registration')) {
+        $image            = Storage::disk('public')->putFile('vat_registration',$request->vat_registration);
+        $data1['vat_registration']  ='storage/'.$image;
+    }  
+    if ($request->hasFile('iban_details')) {
+        $image            = Storage::disk('public')->putFile('iban_details',$request->iban_details);
+        $data1['iban_details']  ='storage/'.$image;
+    }  
+    if ($request->hasFile('verification_image')) {
+        $image            = Storage::disk('public')->putFile('VerificationImage',$request->verification_image);
+        $data1['verification_image']  ='storage/'.$image;
+    }  
+
+    $transporterDetail=TransporterDetail::where('transporter_id',$id)->first();
+
+    if($transporterDetail){
+        TransporterDetail::where('transporter_id',$id)->update($data1);
+
+    }else{
+    $data1['transporter_id']  = $id;
+    TransporterDetail::create($data1);
+
     }
-
-    User::where('id',$id)->update($data);
-
-
-    $data1['description']                   =     $request->description;
-
-    if ($request->hasFile('public_transport_authority_license')) {
-       $image            = Storage::disk('public')->putFile('public_transport_authority_license',$request->public_transport_authority_license);
-       $data1['public_transport_authority_license']  ='storage/'.$image;
-   }   
-
-   if ($request->hasFile('commercial_registration')) {
-       $image            = Storage::disk('public')->putFile('commercial_registration',$request->commercial_registration);
-       $data1['commercial_registration']  ='storage/'.$image;
-   }   
-   if ($request->hasFile('vat_registration')) {
-       $image            = Storage::disk('public')->putFile('vat_registration',$request->vat_registration);
-       $data1['vat_registration']  ='storage/'.$image;
-   }  
-   if ($request->hasFile('iban_details')) {
-       $image            = Storage::disk('public')->putFile('iban_details',$request->iban_details);
-       $data1['iban_details']  ='storage/'.$image;
-   }  
-   if ($request->hasFile('verification_image')) {
-       $image            = Storage::disk('public')->putFile('VerificationImage',$request->verification_image);
-       $data1['verification_image']  ='storage/'.$image;
-   }  
-
-   $transporterDetail=TransporterDetail::where('transporter_id',$id)->first();
-
-   if($transporterDetail){
-    TransporterDetail::where('transporter_id',$id)->update($data1);
-
-}else{
-  $data1['transporter_id']  = $id;
-  TransporterDetail::create($data1);
-
-}
 
 return redirect()->route('transporters.index')->with('success','Updated successfully');
 
@@ -456,20 +455,33 @@ public function resetTransporter(Request $request){
      */
     public function destroy($id)
     {
-      $user = User::where('id',$id)->first();
-      if($user) {
-        $drivers = $user->drivers;
-        $drivers->each(function ($driver) {
-            $driver->delete();
-        });
-        $user->delete();
-      }
-      return response()->json([
-        'message'=>'Delete successfully',
-        'success'=>1,
 
-    ]);
-  }
+        $user = User::where('id', $id)->first();
+        
+        if ($user) {
+            $drivers = $user->drivers;
+            $drivers->each(function ($driver) {
+                $driver->delete();
+            });
+            $user->delete();
+        }
+
+        
+
+        // $user = User::where('id',$id)->first();
+        // if($user) {
+        //     $drivers = $user->drivers;
+        //     $drivers->each(function ($driver) {
+        //         $driver->delete();
+        //     });
+        //     $user->delete();
+        // }
+        return response()->json([
+            'message'=>'Delete successfully',
+            'success'=>1,
+
+        ]);
+    }
 
 public function transportApproveStatus(Request $request)
 {
@@ -480,7 +492,7 @@ public function transportApproveStatus(Request $request)
     $userUpdate =  User::where('id', $request->id)->update([
         'is_approve' => $request->status,
         'is_email_verified' => '1',
-        'password' => bcrypt($password)
+        //'password' => bcrypt($password)
     ]);
 
     if ($userUpdate) {
@@ -488,37 +500,35 @@ public function transportApproveStatus(Request $request)
         $emailData['id'] = $user->unique_ID;
         $emailData['email'] = $user->email;
         $emailData['customer'] = $user->name;
-        $emailData['password'] = $password;
+       // $emailData['password'] = $password;
 
-        if ($user->language_code == 'ar') {
-            $emailData['subject'] = 'حياكم الله في عربات';
-            $view = 'emails.approve_transporter_ar';
-        } elseif ($user->language_code == 'ur') {
-            $emailData['subject'] = 'رجسٹریشن ایکٹیویشن';
-            $view = 'emails.approve_transporter_ur';
-        } else {
-            $emailData['subject'] = 'Registration activation';
-            $view = 'emails.approve_transporter';
-        }
+        // if ($user->language_code == 'ar') {
+        //     $emailData['subject'] = 'حياكم الله في عربات';
+        //     $view = 'emails.approve_transporter_ar';
+        // } elseif ($user->language_code == 'ur') {
+        //     $emailData['subject'] = 'رجسٹریشن ایکٹیویشن';
+        //     $view = 'emails.approve_transporter_ur';
+        // } else {
+        //     $emailData['subject'] = 'Registration activation';
+        //     $view = 'emails.approve_transporter';
+        // }
+
+        $emailData['subject'] = 'Registration activation';
+        $view = 'emails.approve_transporter';
 
         // Send email
         sendMail($view, $emailData);
 
-        // Construct SMS message
-        $message_body_en = 'Dear ' . $user->name . ', We welcome you as a partner with Arabat.
-
-        This SMS  serves as a confirmation that your account is activated and that you are officially a part of the Arabat family.';
-
-       $message_body_ar = $user->name . ' عزيزي،' .
-    "\n\n" .
-    'السلام عليكم' .
-    "\n\n" .
-    'نرحب بكم كشريك معنا في عربات. هذا الرسالة بمثابة تأكيد على تنشيط حسابك كناقل وأنك رسميًا جزء من أسرة عربات.';
-
-
-
-        // Combine English and Arabic messages
-        $message_body = $message_body_en . "\n\n" . $message_body_ar;
+        
+        $message_body =$user->name .'عزيزي \n 
+        لسلام عليكم
+        نرحب بكم كشريك  لعربات. هذا  بمثابة تأكيد على تنشيط حسابك كناقل معنا.\n                                                               
+        ہم عربات کے ساتھ شراکت دار کے طور پر آپ کا خیرمقدم کرتے ہیں۔\n
+        ہم آپ کے اکاؤنٹ کے فعال ہونے کی تصدیق کرتے ہیں۔  \n
+                                                                                            
+        We welcome you as a partner with Arabat.\n
+        We confirm the activation of your account .\n';
+        
 
         // Send SMS
         $this->sendSMS($user->phone_number, $message_body); 
@@ -1064,6 +1074,14 @@ public function forwardQuotation(Request $request){
     }
 }
 
+
+public function driverList()
+{
+
+    $driver   = User::with('transporterDetails')->where(['role_id'=>Config::get('variables.Driver')])->get();
+    return view('transporter.driver-list',compact('driver'));
+
+}
 
 
 }

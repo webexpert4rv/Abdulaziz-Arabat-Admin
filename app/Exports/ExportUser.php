@@ -38,6 +38,7 @@ class ExportUser implements FromCollection, WithHeadings, WithMapping,ShouldAuto
         if($this->type=='transporter'){
             $users = $users->where('role_id',Config::get('variables.Transporter'));
         }
+        $users = $users->withCount('booking');
         if($this->search!="on"){
         
             $search=$this->search;
@@ -60,7 +61,9 @@ class ExportUser implements FromCollection, WithHeadings, WithMapping,ShouldAuto
             "User Id", 
             "Email", 
             "Name",
-            "Acount Type",
+            "Phone Number",            
+            "Acount Type", 
+            "Number Of Jobs",          
             "Created At",
             
         ];
@@ -83,7 +86,10 @@ class ExportUser implements FromCollection, WithHeadings, WithMapping,ShouldAuto
             @$user->unique_ID,
             @$user->email,
             @$user->name,
-            @$account_type,
+            @$user->phone_number,
+            @$account_type,            
+            @$user->booking_count?$user->booking_count:0,            
+           
             date('d/m/Y',strtotime(@$user->created_at)),
         ];
     }

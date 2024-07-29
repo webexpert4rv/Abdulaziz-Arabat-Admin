@@ -32,15 +32,10 @@
                       <div class="form-group">
                         <label for="image">{{ __('adminlte::adminlte.image') }}<span class="text-danger"> *</span></label>
                         <input onchange="ValidateSingleInput(this);" type="file" placeholder="Name" name="image" class="form-control" id="image" maxlength="100" onchange="readURL(this)" >
-                        <img width="25%" id="blah" src="https://arabat-web.rvtechnologies.in/{{$banner->image}}" >
-                      
-                          <div class="error image_error"> @if($errors->has('image')){{ $errors->first('image') }}  @endif</div>
-                      
-                      </div>
-                    
+                        <img width="25%" id="blah" src="{{env('STORAGE_PATH')}}/{{$banner->image}}" >                      
+                          <div class="error image_error"> @if($errors->has('image')){{ $errors->first('image') }}  @endif</div>                      
+                      </div>                    
                     </div>
-
-
                     <div class="col-6">
                       <div class="form-group">
                         <label for="title">{{ __('adminlte::adminlte.english_title') }}<span class="text-danger"> *</span></label>
@@ -59,7 +54,6 @@
                         @endif
                       </div>
                     </div>
-
                 <div class="col-6 company_div" >
                     <div class="form-group">
                       <label for="description">{{ __('adminlte::adminlte.english_description') }}<span class="text-danger"> *</span></label>
@@ -69,7 +63,6 @@
                       @endif
                     </div>
                   </div>
-
                   <div class="col-6 company_div" >
                     <div class="form-group">
                       <label for="arabic_description">{{ __('adminlte::adminlte.arabic_description') }}<span class="text-danger"> *</span></label>
@@ -78,9 +71,7 @@
                         <div class="error">{{ $errors->last('arabic_description') }}</div>
                       @endif
                     </div>
-                  </div>
-        
-
+                  </div>   
                 </div>
                 </div>
                 <!-- /.card-body -->

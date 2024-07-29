@@ -196,7 +196,10 @@ form#job-create .form-group input#schedule_time {
                                                 @endif
                                             </div>
                                         </div>
-                                         <div class="col-6">
+ 
+
+
+                                        <div class="col-6">
                                           <div class="form-group form-group-width w-100">
                                             <label for="email">Enter Pickup Address</label>
                                             <input autocomplete="off" type="hidden" id="pick_up_lat"   name="pick_up_lat" >
@@ -227,7 +230,7 @@ form#job-create .form-group input#schedule_time {
                                               <label for="email">Enter Drop Address</label>
                                               <input autocomplete="off" type="hidden" id="destination_lat" name="destination_lat">
                                               <input autocomplete="off" type="hidden" id="destination_long" name="destination_long">
-                                              <input autocomplete="off" type="text" readonly name="destination_address"  class="form-control input-dash-log" value="{{old('destination_address')}}" onclick="destination()" id="destination_address" placeholder="Enter Pickup Location(Optional)">
+                                              <input autocomplete="off" type="text" readonly name="destination_address"  class="form-control input-dash-log" value="{{old('destination_address')}}" onclick="destination()" id="destination_address" placeholder="Enter Drop Address">
                                             </div>                      
                                           </div>
                                           <div class="col-md-6">
@@ -307,6 +310,68 @@ form#job-create .form-group input#schedule_time {
                                             </div>
                                         </div>
                                     </div>
+
+                                       <div class="col-md-6">
+                                            <div class="form-group">
+                                              <label for="email">Pickup Region</label>
+                                              <select name="pick_up_region_id" style="border-radius: 9px;width: 100%;height: 59px;" id="pick_up_region_id" class="selectpicker input-vehicle" data-live-search="true" data-container="body">
+                                                <option value="" selected="">Select Pickup Region</option>
+                                                @foreach($getRegion as $region)
+                                                  <option value="{{$region->id}}">
+                                                    {{$region->name}}
+                                                  </option>
+                                                @endforeach
+                                              </select>
+                                            </div>
+                                        </div>
+                                        
+
+                                        <div class="col-md-6">
+                                          <div class="form-group">
+                                                <label for="email">Pickup City</label>
+                                              <select name="pick_up_sub_region_id" id="pick_up_sub_region_id" class="sub_region selectpicker input-vehicle"  data-live-search="true" data-container="body" style="border-radius: 9px;width: 100%;height: 59px;" >
+                                                <option value="" selected="">Select Your City</option>
+                                              </select>
+                                          </div>
+                                      </div>
+
+
+
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                              <label for="email"> Drop Region</label>
+                                              <select name="destination_region_id" style="border-radius: 9px;width: 100%;height: 59px;" id="destination_region_id" class="selectpicker input-vehicle" data-live-search="true" data-container="body">
+                                                <option value="" selected="">Select Drop Region</option>
+                                                @foreach($getRegion as $region)
+                                                  <option value="{{$region->id}}">
+                                                    {{$region->name}}
+                                                  </option>
+                                                @endforeach
+                                              </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                        <div class="form-group ">
+                                        <label for="email">Drop City</label>
+                                          <select name="destination_sub_region_id" id="destination_sub_region_id" style="border-radius: 9px;width: 100%;height: 59px;"  class="drop_sub_region selectpicker input-vehicle"
+                                            data-live-search="true" data-container="body">
+                                            <option value="" selected="">Select Drop City</option>
+                                          </select>
+                                        </div>
+                                      </div>
+
+
+
+
+
+
+
+
+
+
+
                                     <div class="col-md-12"  >
                                           <div class="form-group form-group-width w-100">
                                             <label for="email">Brief Description of Goods</label> 
@@ -319,77 +384,14 @@ form#job-create .form-group input#schedule_time {
                                     <div class="card-footer">
                                     <button type="text" id="createJob" class="btn btn-primary">{{ __('adminlte::adminlte.save') }}</button>
                                     </div>
-                                    <br><br>
-                                 
-                                 
-                               
-                                <!-- <div class="request_for_quotations mb-3">
-                                  <div class="form-group form-group-width">
-                                    <div class="custom_check" style="width:26px !important;border:none !important;">
-                                      <input autocomplete="off" type="checkbox" checked name="rfq_status">
-                                      <span></span>
-
-                                    </div>  Request for Quotations               
-                                  </div>
-                                </div> -->  
+                                    <br><br> 
+                                
                                     
-                            </div>
-                            <!-- /.card-body -->
+                            </div> 
                             
                         </form>
                          
-                      <!--   <hr>
-                        <h4 style="text-align:center;">Invoices Details</h4><br>
-                         <div class="row">
-                                      <div class="col-6">
-                                        <form method="post" action="{{ route('download-user-quation',['type'=>'user']) }}" enctype="multipart/form-data">
-                                            <div class="form-group">
-                                                <label for="email">Select User</label>
-                                                <select required data-placeholder="Select User" name="user_id" id="user_id" style="border-radius: 9px;width: 100%;height: 59px;" class="  selectpicker input-vehicle" data-live-search="true" data-container="body"> 
-                                                  <option value="" selected="">Select User</option>
-                                                @foreach($getUsers as $getUser)
-                                                <option value="{{$getUser->id}}">{{$getUser->name}}</option> 
-                                                @endforeach
-                                              </select>
-                                                <div id ="email_error" class="error"></div>
-                                                @if($errors->has('email'))
-                                                <div class="error">{{ $errors->last('email') }}</div>
-                                                @endif
-                                            </div>
-                                            <div>
-                                                    <button type="submit" name="action" value="userQuations" style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Quations</button>
-                                                    <button type="submit" name="action" value="userInvoice" style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Invoices</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <div class="col-6">
-                                            <form method="post" action="{{ route('download-transporter-quation',['type'=>'transporter']) }}" enctype="multipart/form-data">
-                                            <div class="form-group">
-                                                <label for="email">Select Transporter</label>
-                                                <select required data-placeholder="Select Transporter" name="transporter_id" id="transporter_id" style="border-radius: 9px;width: 100%;height: 59px;" class="  selectpicker input-vehicle" data-live-search="true" data-container="body"> 
-                                                  <option value="" selected="">Select Transporter</option>
-                                                @foreach($getTransporters as $getTransporter)
-                                                <option value="{{$getTransporter->id}}">{{$getTransporter->name}}</option> 
-                                                @endforeach
-                                              </select>
-                                                <div id ="email_error" class="error"></div>
-                                                @if($errors->has('email'))
-                                                <div class="error">{{ $errors->last('email') }}</div>
-                                                @endif
-                                            </div>
-                                             <div>
-                                                    <button type="submit"  name="action" value="transporterQuations" style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Quations</button>
-                                                    <button type="submit" name="action" value="transporterInvoice"  style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Invoices</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                       
-                                        
-
-                                        
-                                        
-                                         
-                                    </div> -->
+                      
           </div>
         </div>
       </div>
@@ -398,7 +400,7 @@ form#job-create .form-group input#schedule_time {
 <div class="modal fade" id="pickUpLocation" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">    
     <div class="modal-content content_modal">
-      <button type="button" style="margin-left:900px;margin-bottom:-15px;" class="btn close_btn"  data-bs-dismiss="modal" aria-label="Close">X</button>
+      <button type="button" style="margin-left:900px;margin-bottom:-15px;z-index: 100;" class="btn close_btn"  data-bs-dismiss="modal" aria-label="Close">X</button>
       <div class="modal-header header_modal"> 
         <input id="searchmapspickUpLocation" style="width: 50%;" class="search-location" type="text" placeholder="Enter a Location"> 
         <div style="width: 916px; height: 400px;" id="mapspickUpLocation"></div>
@@ -411,7 +413,7 @@ form#job-create .form-group input#schedule_time {
   <div class="modal-dialog modal-dialog-centered">
 
     <div class="modal-content content_modal">
-      <button type="button"  style="margin-left:900px;margin-bottom:-15px;" class="btn close_btn"  data-bs-dismiss="modal" aria-label="Close">X</button>
+      <button type="button"  style="margin-left:900px;margin-bottom:-15px;z-index: 100;" class="btn close_btn"  data-bs-dismiss="modal" aria-label="Close">X</button>
       <input id="searchmapsdestinationaddress" style="width: 50%;" class="search-location" type="text" placeholder="Entar a Location"> 
 
       <div class="modal-header header_modal">
@@ -804,11 +806,13 @@ var validate=$('#job-create').validate({
       user_id: "required",
       transporter_id:"required",
       pick_up_address:"required", 
+      destination_address:"required",
       number_of_vehicle: "required",
       schedule_date    : "required",
       schedule_time    : "required",
       product_id       : "required",
     
+      
 
     },
     messages: {
@@ -825,6 +829,11 @@ var validate=$('#job-create').validate({
       pick_up_address:{
         "required":'Please select Pickup Address',
       },
+      destination_address:{
+        "required":'Please select  Drop Address',
+      },
+
+      
       number_of_vehicle: { 
         "required":'Please Select Number of Vehcle',         
       },
@@ -865,6 +874,140 @@ var validate=$('#job-create').validate({
 
 
   });
+
+
+  $(document).on("change", "select[name*=pick_up_region_id]", function () {
+
+			var dataId = $(this).attr("id");
+
+			var region_id = this.value;
+
+			$.ajax({
+				url: "{{ route('job.sub-regions') }}",
+				type: 'post',
+
+				data: {
+					"_token": "{{ csrf_token() }}",
+					region_id: region_id
+				},
+
+				success: function (response) {
+					$('.sub_region').html(response);
+
+				}
+			});
+		});
+
+		$(document).on("change", "select[name*=destination_region_id]", function () {
+
+			var region_id = this.value;
+
+			$.ajax({
+				url: "{{ route('job.sub-regions') }}",
+				type: 'post',
+
+				data: {
+					"_token": "{{ csrf_token() }}",
+					region_id: region_id
+				},
+
+				success: function (response) {
+
+					$('.drop_sub_region').html(response);
+				}
+			});
+		});
+
+		$(document).on("change", "select[name*=destinations_region_id]", function () {
+
+			var region_id = this.value;
+
+			var dataId = $(this).data("id");
+
+
+
+			$.ajax({
+				url: "{{ route('job.sub-regions') }}",
+				type: 'post',
+
+				data: {
+					"_token": "{{ csrf_token() }}",
+					region_id: region_id
+				},
+
+				success: function (response) {
+
+					$('.receiver_sub_regio' + dataId).html(response);
+				}
+			});
+		});
+
+
+    $(document).on("change", "select[name*=pick_up_region_id]", function () {
+
+var dataId = $(this).attr("id");
+
+var region_id = this.value;
+
+$.ajax({
+  url: "{{ route('job.sub-regions') }}",
+  type: 'post',
+
+  data: {
+    "_token": "{{ csrf_token() }}",
+    region_id: region_id
+  },
+
+  success: function (response) {
+    $('.sub_region').html(response);
+
+  }
+});
+});
+
+$(document).on("change", "select[name*=destination_region_id]", function () {
+
+  var region_id = this.value;
+
+  $.ajax({
+    url: "{{ route('job.sub-regions') }}",
+    type: 'post',
+
+    data: {
+      "_token": "{{ csrf_token() }}",
+      region_id: region_id
+    },
+
+    success: function (response) {
+
+      $('.drop_sub_region').html(response);
+    }
+  });
+});
+
+$(document).on("change", "select[name*=destinations_region_id]", function () {
+
+  var region_id = this.value;
+
+  var dataId = $(this).data("id");
+
+
+
+  $.ajax({
+    url: "{{ route('job.sub-regions') }}",
+    type: 'post',
+
+    data: {
+      "_token": "{{ csrf_token() }}",
+      region_id: region_id
+    },
+
+    success: function (response) {
+
+      $('.receiver_sub_regio' + dataId).html(response);
+    }
+  });
+});
 
 
  

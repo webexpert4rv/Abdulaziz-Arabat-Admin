@@ -27,6 +27,7 @@ class UpdateQuery extends Model
 
 
     protected $guarded=[];
+    
     protected $table='update_query';
 
 

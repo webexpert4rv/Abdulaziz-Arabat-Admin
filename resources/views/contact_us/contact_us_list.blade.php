@@ -57,10 +57,12 @@
                 <thead>
                   <tr>
                     <th>#</th>
+                    <th>&nbsp;&nbsp;Date &nbsp;&nbsp;</th>
                     <th>Name</th>
                     <th>Email</th>
 
                     <th>Description</th>
+                 
                     <th>Actions</th>
                 
                   </tr>
@@ -69,10 +71,12 @@
                   <?php for ($i=0; $i < count($contactUsMessagesList); $i++) { ?>
                     <tr>
                       <td>{{ $i+1 }}</td>
+                      <td>{{ $contactUsMessagesList[$i]->created_at->format('d-m-Y') }}</td>
                       <td>{{ $contactUsMessagesList[$i]->first_name }} {{ $contactUsMessagesList[$i]->last_name }}</td>
                       <td>{{ $contactUsMessagesList[$i]->email }}</td>
 
                       <td>{{ $contactUsMessagesList[$i]->description }}</td>
+                    
                       <td>
                         @can('view_feedback')
                         <a href="{{ route('view_contact_us_message', ['id' => $contactUsMessagesList[$i]->id]) }}" title="View"><i class="text-info fa fa-eye"></i></a>

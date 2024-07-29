@@ -20,14 +20,14 @@
          width: 100%;
          max-width: 1016px;
          margin: 0 auto;
-         /*          padding: 30px;*/
-         border-radius: 5px;
-         background-color: #ffffff;
-         margin-bottom: 15px;
-         /*          background-image: url("{{asset('captain_america/images/shape_image.png')}}");*/
-         background-repeat: no-repeat;
-         background-position: top left;
-         background-size: 350px;
+/*          padding: 30px;*/
+border-radius: 5px;
+background-color: #ffffff;
+margin-bottom: 15px;
+/*          background-image: url("{{asset('captain_america/images/shape_image.png')}}");*/
+background-repeat: no-repeat;
+background-position: top left;
+background-size: 350px;
 }  
 td.top_header_inner {
    background-color: #ffcd00;
@@ -176,7 +176,9 @@ tbody tr:nth-of-type(odd) {
    text-transform: uppercase;
    line-height: 22px;
 }
-.invoice .top_header table tbody tr {
+.invoice .top_header table tbody tr {$pdf = PDF::loadView('reports.invoice', compact('data'));
+                        
+                        retur
    background-color: transparent; 
    align-items: center;
    justify-content: space-between;
@@ -204,24 +206,20 @@ tbody tr:nth-of-type(odd) {
    border-top: 1px solid #909090;
    background: #fafafa;
 }   
-.footer-social-icons {
-    background: #000;
-    border-radius: 0;
-    /* display: flex; */
-    width: 36px;
-    margin: 0px 5px;
-    /* align-items: center; */
-    /* justify-content: center; */
-    height: 30px;
-    display: inline-block;
-    line-height: 40px;
+.footer-social-icons{
+   background: #000;
+   border-radius: 50px;
+   display: flex;
+   width: 30px;
+   margin: 0px 5px;
+   align-items: center;
+   justify-content: center;
+   height: 30px;
+   
 }
-.footer-social-icons img {
-    text-decoration: inherit;
-    text-decoration-color: #000;
-    position: relative;
-    top: 4px;
-    left: 8px;
+.footer-social-icons img{
+   text-decoration: inherit;
+   text-decoration-color: #000;
 }
 /* a5 css start */
 body.childa5 {
@@ -252,250 +250,226 @@ body.childa5 .triangle-up {
 </head>
 <body>
    <section id="invoice_wrapper">
-      <div class="invoice">
-         <div>
-
+  
+       
             @foreach($data as $datas) 
-            <div class="top_header" style="padding:0px;">
-               <table cellspacing="0" cellpadding="0" style="position: relative;">
-                  <tr>
-                     <td class="top_header_inner" style="width:60%;padding-left: 40px;">
+            <div class="invoice">
+                  <div class="top_header" style="padding:0px;">
+                     <table cellspacing="0" cellpadding="0" style="position: relative;">
+                        <tr>
+                           <td class="top_header_inner" style="width:70%;padding-left: 40px;">
+                              <table cellspacing="0" cellpadding="0" class="left"> 
+                                 <tr>
+                                    <td><h2 style="color: #000; font-family: 'Roboto', sans-serif;">Invoice</h2></td>
+                                 </tr>
+                                 <tr>
+                                    <td><p style="color: #000; padding-top: 3px;" class="invoice_number"><b>Invoice No. :</b>   {{$datas['invoice_no']}}</p></td>
+                                 </tr>
+                                 <!-- <tr>
+                                    <td><p style="color: #000; padding-top: 3px; padding-bottom: 0px;" class="order_number"><b>Booking No. :</b>  {{$datas['book_id']}}</p></td>
+                                 </tr> -->
+                                 <tr>
+                                    <td><p style="color: #000; padding-top: 3px; padding-bottom: 0px;" class="order_number"><b>Job ID :</b>  {{$datas['job']['job_id']}}</p></td>
+                                 </tr>
+                                 <tr>
+                                    <td><p style="color: #000; padding-top: 3px;" class="invoice_number"><b>Date of Booking : </b>
+                                    {{date('d/m/Y',strtotime($datas['booked_on']))}}</p></td>
+                                 </tr> 
+                                 <tr>
+                                    <td><p style="color: #000; padding-top: 3px;" class="invoice_number"><b>Date of Shipment : </b>
+                                    {{date('d/m/Y',strtotime($datas['job']['schedule_date']))}}</p></td>
+                                 </tr>
+                                 <tr>
+                                    <td><p style="color: #000; padding-top: 3px;" class="invoice_number"><b>Booking Status :</b>
+                                    {{ucfirst(str_replace('_', ' ', $datas['booking_status']))}}</p></td>
+                                 </tr>
 
-                        <table cellspacing="0" cellpadding="0" class="left"> 
-                           <tr>
-                              <td><h2 style="color: #000; font-family: 'Roboto', sans-serif;">Invoice</h2></td>
+                              </table>
+                           </td>
+                           <td style="background: #fff; float: right; margin: 0px 0 0; right: 0; margin-left: auto; display:flex; text-align:center; padding: 30px 30px 30px;">
+                              <table cellspacing="0" cellpadding="0" style="background:#ffffff;">
+                                 <tr>
+                                    <td style="background: #ffffff;"><img src="{{env('STORAGE_PATH')}}/images/arabat-logo.png" alt="" style="min-width:110px;max-width:220px;min-height:70px;max-height:90px;float:right;"></td>
+                                 </tr>
+                              </table>
+                           </td>
+                        </tr>
+                     </table>
+                  </div>
+                  <div class="contact_info">
+                        <table>
+                           <tr style="background:transparent;">                     
+                              <td style="vertical-align: baseline; width: 40%;">
+                                 <table style="line-height: 25px;" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                       <td style="background: #ffffff; color: #f1bb2f; padding-right: 25px;"><b>Sender's Details</b></td>
+                                    </tr>
+                                    <tr>
+                                       <td style="background: #ffffff;"><b>Name</b>  :- {{$datas['user']['name']}}</td>
+                                    </tr>
+                                    <tr>
+                                       <td style="background: #ffffff;"><b>Pickup point Address</b> :- {{$datas['job']['pick_up_address']}}</td>
+                                    </tr>                           
+                                    <!-- <tr>                               
+                                       <td style="background: #ffffff;"><b>City</b> :- {{$datas['job']['city']}}</td>
+                                    </tr> -->
+                                 </table>
+                              </td>
+                              <td style="vertical-align: unset; line-height: 24px; width: 20%;">
+                                 <table cellspacing="0" cellpadding="0">
+                                    <tbody>
+                                       <tr>
+                                          <td style="color: #000; background: #ffffff; visibility: hidden; padding-right: 25px;"><b></b></td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </td>
+                              <td style="vertical-align: unset; line-height: 24px; width: 20%;">
+                                 <table cellspacing="0" cellpadding="0">
+                                    <tbody>
+                                       <tr>
+                                          <td style="color: #000; background: #ffffff; visibility: hidden; padding-right: 25px;"><b></b></td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </td>
+                              <td style="vertical-align: unset; line-height: 24px; width: 20%;">
+                                 <table cellspacing="0" cellpadding="0">
+                                    <tbody>
+                                       <tr>
+                                          <td style="color: #000; background: #ffffff; visibility: hidden; padding-right: 25px;"><b></b></td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </td>
+                           
                            </tr>
-                           <tr>
-                              <td><p style="color: #000; padding-top: 3px;" class="invoice_number"><b>Invoice No. :</b>   {{$datas['invoice_no']}}</p></td>
-                           </tr>
-                           <!-- <tr>
-                              <td><p style="color: #000; padding-top: 3px; padding-bottom: 0px;" class="order_number"><b>Booking No. :</b>  {{$datas['book_id']}}</p></td>
-                           </tr> -->
-                           <tr>
-                              <td><p style="color: #000; padding-top: 3px; padding-bottom: 0px;" class="order_number"><b>Job ID :</b>  {{$datas['job']['job_id']}}</p></td>
-                           </tr>
-                           <tr>
-                              <td><p style="color: #000; padding-top: 3px;" class="invoice_number"><b>Date of Booking : </b>
-                              {{date('d/m/Y',strtotime($datas['booked_on']))}}</p></td>
-                           </tr> 
-                           <tr>
-                              <td><p style="color: #000; padding-top: 3px;" class="invoice_number"><b>Date of Shipment : </b>
-                              {{date('d/m/Y',strtotime($datas['job']['schedule_date']))}}</p></td>
-                           </tr>
-                           <tr>
-                              <td><p style="color: #000; padding-top: 3px;" class="invoice_number"><b>Booking Status :</b>
-                              {{ucfirst(str_replace('_', ' ', $datas['booking_status']))}}</p></td>
-                           </tr>
-
                         </table>
-                     </td>
-                     <td style="background: #fff; float: right; margin: 0px 0 0; right: 0; margin-left: auto; display:flex; text-align:center; padding: 30px 30px 30px;">
-                        <table cellspacing="0" cellpadding="0" style="background:#ffffff;">
-                           <tr>
-                              <td style="background: #ffffff;"><img src="{{env('STORAGE_PATH')}}images/arabat-logo.png" alt="" style="min-width:110px;max-width:220px;min-height:70px;max-height:90px;float:right;"></td>
-                           </tr>
-                        </table>
-                     </td>
-                  </tr>
-               </table>
-
-            </div>
-            <div class="contact_info">
-
-               <table>
-                  <tr style="background:transparent;">
-                    
-                     <td style="vertical-align: baseline; width: 40%;">
-                        <table style="line-height: 25px;" cellspacing="0" cellpadding="0">
-                           <tr>
-                              <td style="background: #ffffff; color: #f1bb2f; padding-right: 25px;"><b>Sender's Details</b></td>
-                           </tr>
-                           <tr>
-                              <td style="background: #ffffff;"><b>Name</b>  :- {{$datas['user']['name']}}</td>
-                           </tr>
-                           <tr>
-                              <td style="background: #ffffff;"><b>Pickup point Address</b> :- {{$datas['job']['pick_up_address']}}</td>
-                           </tr>                           
-                           <tr>                               
-                              <td style="background: #ffffff;"><b>City</b> :- {{$datas['job']['city']}}</td>
-                           </tr>
-                        </table>
-                     </td>
-                     <td style="vertical-align: unset; line-height: 24px; width: 20%;">
-                        <table cellspacing="0" cellpadding="0">
+                  </div>  
+                  <br>
+                  <div class="product_data_wrapper" style="margin: 1px 0 0;    margin-bottom: 100px;">
+                     <div class="">
+                        <table class="table">
+                           <thead style="background:transparent;">
+                              <tr>
+                                 <td style="width: 18%;" scope="col">Type</td>
+                                 <td style="width: 60%;" scope="col">Description</td>
+                                 <td style="width: 16%;" scope="col">Quantity</td>
+                                 <td scope="col" style="width: 18%; padding-right: 10px;text-align: right;" align="right">Price</td>
+                              </tr>
+                           </thead>
                            <tbody>
                               <tr>
-                                 <td style="color: #000; background: #ffffff; visibility: hidden; padding-right: 25px;"><b></b></td>
+                                 <td style="padding:0px; padding-left: 10px;">
+                                    <table width="100%">
+                                       <tr style="background:transparent;">
+                                          <td align="left" style=" border: none;">
+                                             <div>
+                                                <p>{{$datas['job']['title']}}</p>
+                                             </div>
+                                          </td>
+                                       </tr>
+                                    </table>
+                                 </td> 
+                                 <?php
+                                 if(!empty($datas['jobReceivers'][0]['destination_address'])){
+                                    $destinationAddress=$datas['jobReceivers'][0]['destination_address'];
+                                 }else{
+                                    $destinationAddress=$datas['jobReceivers'][0]['DestinationAddres']['name'].' , '.$datas['jobReceivers'][0]['DestinationRegion']['name'];
+                                 }
+                                 ?>
+                                 <td style="padding:0px; padding-left: 10px;">
+                                    <p><strong>Job ID</strong> : {{$datas['job']['job_id']}}</p>
+                                    <p><strong>User Name</strong> : {{$datas['transporter']['name']}}</p>
+                                    <p><strong>Date of Order</strong> : {{$datas['job']['schedule_date']}}</p>                                
+                                    <p><strong>Vehicle Type</strong> : {{$datas['job']['vehicle_type']}}</p>
+                                    <p><strong>From</strong> : {{$datas['job']['pick_up_address']}} <strong>To</strong> - {{$destinationAddress}}</p>
+                                    <p style="color:red"><b>Quote Amount (Including TAX) : {{$datas['tota']['sub_amount']}} SAR</b></p>
+                                    <strong>[Note:-</strong> Invoice for the order will be issued by Transporter.] 
+                                 </td> 
+                                 <td style="padding:0px; padding-left: 10px;">{{$datas['job']['number_of_items']}}</td> 
+                                 <!-- <td  style="padding:0px; padding-right: 10px;" align="right">{{$datas['job']['sub_amount']}} SAR</td> -->
+                              </tr>
+                        
+                              @if($datas['tota']['discount'])
+                              <tr style="background:transparent;">
+                                 <td style="border: none;"></td>
+                                 <!-- <td style="border: none;"></td> -->
+                                 <td colspan="2"   align="right"><b>Discount</b></td>
+                                 <td style=" position:relative;" align="right">{{number_format($datas['tota']['discount'], 2)}} SAR</td>
+                              </tr> 
+                              @endif
+                              
+                              <tr >
+                                 <td style="border: none;"></td>
+                                 <!--  <td style="border: none;"></td> -->
+                                 <td colspan="2"   align="right"><b>Commission</b></td>
+                                 <td style="position:relative;" align="right">{{number_format($datas['tota']['commssion'], 2)}} SAR</td>
+                              </tr>
+                              <tr >
+                                 <td style="border: none;"></td>
+                                 <!--  <td style="border: none;"></td> -->
+                                 <td colspan="2"   align="right"><b>Tax</b></td>
+                                 <td style="position:relative;" align="right">{{number_format($datas['tota']['tax_price'], 2)}} SAR</td>
+                              </tr>
+                              @if($datas['tota']['penaltiy_amount'])
+                              <tr >
+                                 <td style="border: none;"></td>
+                                 <!--      <td style="border: none;"></td>  -->
+                                 <td colspan="2"   align="right"><b>Penalty</b></td>
+                                 <td style=" position:relative;" align="right">{{number_format($datas['tota']['penaltiy_amount'], 2)}} SAR</td>
+                              </tr>
+                              @endif
+                              <tr>
+                                 <td style="border-top: 1px solid #909090; border-bottom: 1px solid #909090;"></td>
+                                 <td style="border-top: 1px solid #909090; border-bottom: 1px solid #909090;"></td> 
+                                 <td style="border-top: 1px solid #909090; border-bottom: 1px solid #909090;"><b>Total</b></td>
+                                 <td style="border-top: 1px solid #909090; border-bottom: 1px solid #909090; position:relative;" align="right">{{ number_format((ceil($datas['tota']['tax_price']+$datas['tota']['commssion'])), 2)}} SAR</td>
+                              </tr>
+                           </tbody>
+                        </table>         
+                     </div>
+
+                     <div class="footer" style="text-align:center;">
+
+                        <p><b>THANKS FOR YOUR BUSINESS!</b> 
+                        <br>IF YOU HAVE ANY QUESTIONS, PLEASE DO GET IN TOUCH WITH US</p>
+                        <p style="margin-bottom:0px;"><b>ARABAT</b>><br>
+                           www.arabat.sa
+                        <br>EMAIL/PHONE/WHAT'S APP</p>                        
+                        <table style="margin-top: 0px;">
+                           <tbody>
+                              <tr style="background: transparent; margin-top:5px;">
+                                 <td  style="width:15%;"></td>
+                                 <td style="width:24%;"></td>
+                                 <td  style="width:2%;">
+                                    <a href="#" class="" style="position:relative;padding:5px;">
+                                       <img src="{{env('STORAGE_PATH')}}/images/facebook-f.png" style="position: absolute; top:7px; left:7px;background: #000;border-radius: 50px;margin: 0px 5px;width:20px;padding:10px;" alt="">
+                                    </a>
+
+                                 </td>
+                                 <td style="width:2%;">
+                                    <a href="#" class="footer-social-icons" style="position:relative;padding:5px;">
+                                       <img src="{{env('STORAGE_PATH')}}/images/instagram.png" style="position: absolute; top:7px; left:7px;background: #000;border-radius: 50px;margin: 0px 5px;width:20px;padding:10px;" alt="">
+                                    </a>
+                                 </td>
+                                 <td style="width:2%;">
+                                    <a href="#" class="footer-social-icons" style="position:relative;padding:5px;">
+                                       <img src="{{env('STORAGE_PATH')}}/images/twitter.png" style="position: absolute; top:8px; left:8px;background: #000;border-radius: 50px;margin: 0px 5px;width:20px;padding:10px;" alt="">
+                                    </a>
+                                 </td>
+                                 <td style="width:20%;"></td>
+                                 <td style="width:20%;"></td>
                               </tr>
                            </tbody>
                         </table>
-                     </td>
-                     <td style="vertical-align: baseline; width: 40%; float: right;">
-                        <table style="line-height: 25px;" cellspacing="0" cellpadding="0">  
-                           <tr>
-                              <td style="color: #f1bb2f; background: #ffffff; padding-right: 25px;"><b>Transporter Details</b></td>
-                           </tr>
-                           <tr>
-                              <td style="background: #ffffff;"><b>Transporter Name </b> :- {{$datas['transporter']['name']}}</td>
-                           </tr>
-                           <tr>
-                              <td style="background: #ffffff;"><b>TGA License No. </b> :- {{$datas['transporter']['pta_license_number']}}</td>
-                           </tr>
-
-                           <tr>
-                              <td style="color: #f1bb2f; background: #ffffff; padding-right: 25px;"><b>Receiver Details</b></td>
-                           </tr>
-
-
-                           @foreach (@$datas['jobReceivers'] as $key => $value)                          
-
-                           <tr>
-                              <td style="background: #ffffff;"><b>Name </b> :- {{$value->receivers_name}}</td>
-                           </tr>
-                           <tr>
-                              <td style="background: #ffffff;"><b>mobile/ or Phone no.</b> :- {{$value->receiver_number}}</td>
-                           </tr>
-                           <tr>
-                              <td style="background: #ffffff;"><b>City </b> :- {{$value->DestinationAddres->name}}</td>
-                           </tr>  
-
-                           @endforeach
-
-                        </table>
-                     </td>
-                  </tr>
-               </table>
-            </div>
-        <!--     <div class="" style="display: flex; justify-content: end; float: right;">
-               <div class="label-invoice" style="margin: 6px 138px 8px 0;">
-                  <h3 class="ship-invoice" style="font-size:16px; margin-bottom: 5px;">{{__('web.receiver_details')}}</h3>
-                  <p>{{date('d/m/Y - h:i A')}}</p>
-               </div>
-            </div>  -->
-
-
-            <br>
-            <div class="product_data_wrapper" style="margin: 1px 0 0;">
-               <div class="">
-                  <table class="table">
-                     <thead style="background:transparent;">
-                        <tr>
-                           <td style="width: 24%;" scope="col">Type</td>
-                           <td style="width: 40%;" scope="col">Description</td>
-                           <td style="width: 18%;" scope="col">Quantity</td>
-                           <td scope="col" style="width: 18%; padding-right: 10px;text-align: right;" align="right">Price</td>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        <tr>
-                           <td style="padding:0px; padding-left: 10px;">
-                              <table width="100%">
-                                 <tr style="background:transparent;">
-                                    <td align="left" style=" border: none;">
-                                       <div>
-                                          <p>{{$datas['job']['title']}}</p>
-                                       </div>
-                                    </td>
-                                 </tr>
-                              </table>
-                           </td> 
-                           <td style="padding:0px; padding-left: 10px;">
-                              <p>Schedule date : {{$datas['job']['schedule_date']}}</p>
-                              <p>Schedule time : {{$datas['job']['schedule_time']}}</p>
-                              <p>Total weight of goods : {{$datas['job']['total_goods_weight']}} {{ $datas['job']['total_goods_weight']?'Tonne':''}}</p>
-                              <p>Description of goods :{{$datas['job']['description_of_goods']}}</p>
-                           </td> 
-                           <td style="padding:0px; padding-left: 10px;">{{$datas['job']['number_of_items']}}</td> 
-                           <td  style="padding:0px; padding-right: 10px;" align="right">{{$datas['job']['sub_amount']}} SAR</td>
-                        </tr>
-
-                        <tr>
-                        </tr>
-                        <tr style="background:transparent;">
-                           <td style="border: none;"></td>
-                           <!--  <td style="border: none;"></td> -->
-                           <td colspan="2"   align="right"><b>Subtotal</b></td>
-                           <td style=" position:relative;" align="right"> {{$datas['tota']['sub_amount']}} SAR</td>
-                        </tr> 
-                        @if($datas['tota']['discount'])
-                        <tr style="background:transparent;">
-                           <td style="border: none;"></td>
-                           <!-- <td style="border: none;"></td> -->
-                           <td colspan="2"   align="right"><b>Discount</b></td>
-                           <td style=" position:relative;" align="right">{{$datas['tota']['discount']}} SAR</td>
-                        </tr> 
-                        @endif
-                        <tr >
-                           <td style="border: none;"></td>
-                           <!--  <td style="border: none;"></td> -->
-                           <td colspan="2"   align="right"><b>Tax</b></td>
-                           <td style="position:relative;" align="right">{{$datas['tota']['tax_price']}} SAR</td>
-                        </tr> 
-                        <tr >
-                           <td style="border: none;"></td>
-                           <!--  <td style="border: none;"></td> -->
-                           <td colspan="2"   align="right"><b>Commission</b></td>
-                           <td style="position:relative;" align="right">{{$datas['tota']['commssion']}} SAR</td>
-                        </tr>
-                        @if($datas['tota']['penaltiy_amount'])
-                        <tr >
-                           <td style="border: none;"></td>
-                           <!--      <td style="border: none;"></td>  -->
-                           <td colspan="2"   align="right"><b>Penalty</b></td>
-                           <td style=" position:relative;" align="right">{{$datas['tota']['penaltiy_amount']}} SAR</td>
-                        </tr>
-                        @endif
-                        <tr>
-                           <td style="border: none; background: #fff;"></td>
-                           <td style="border: none; background: #fff;"></td>
-                           <td style="border-top: 1px solid #909090; border-bottom: 1px solid #909090;"><b>Total</b></td>
-                           <td style="border-top: 1px solid #909090; border-bottom: 1px solid #909090; position:relative;" align="right">{{$datas['tota']['booking_fee']}} SAR</td>
-                        </tr>
-                     </tbody>
-                  </table>         
-               </div>
-               <div class="footer" style="text-align:center;">
-
-                  <p><b>THANKS FOR YOUR BUSINESS!</b> 
-                     <br>IF YOU HAVE ANY QUESTIONS, PLEASE DO GET IN TOUCH WITH US</p>
-                     <p style="margin-bottom:0px;"><b>ARABAT</b><br>
-                        www.arabat.sa
-                       <br>EMAIL/PHONE/WHAT'S APP</p>                        
-                       <table style="margin-top: 0px;">
-                        <tbody>
-                           <tr style="background: transparent; margin-top:5px;">
-                              <td ></td>
-                              <td></td>
-                              <td  style="width:2%;">
-                                 <a href="#" class="footer-social-icons" style="position:relative;padding:5px;">
-                                    <img src="{{env('STORAGE_PATH')}}images/facebook-f.png" style="width: 20px;" alt="">
-                                 </a>
-
-                              </td>
-                              <td style="width:2%;">
-                                 <a href="#" class="footer-social-icons" style="position:relative;padding:5px;">
-                                    <img src="{{env('STORAGE_PATH')}}images/instagram.png" style="width: 20px;"  alt="">
-                                 </a>
-                              </td>
-                              <td style="width:2%;">
-                                 <a href="#" class="footer-social-icons" style="position:relative;padding:5px;">
-                                    <img src="{{env('STORAGE_PATH')}}images/twitter.png"  style="width: 20px;"  alt="">
-                                 </a>
-                              </td>
-                              <td></td>
-                              <td></td>
-                           </tr>
-                        </tbody>
-                     </table>
-                  </div>
-               </div>
-
-               @endforeach
-            </div>
-
-
-
-         </div>
-      </section>
-   </body>
-   </html>
+                     </div>
+                  </div>   
+               </div>            
+            @endforeach
+        
+      
+   </section>
+</body>
+</html>
+    

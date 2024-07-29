@@ -16,6 +16,8 @@ use App\Models\ContactUs;
 use App\Models\Reviews;
 use App\Models\Testimonial;
 use App\Models\Booking;
+use App\Models\UpdateQuery;
+
 use Auth;
 use Hash;
 use Session; 
@@ -155,4 +157,18 @@ class AdminController extends Controller
 		return redirect('/login');
 	}
 
+
+	public function download($filename)
+	{   
+		$newUrl = str_replace('storage/', '', $filename);
+		$filePath = config('services.storage_path.image_path').$newUrl;
+		return response()->download($filePath);
+	}
+
+
+
+	
+
+
+	
 }

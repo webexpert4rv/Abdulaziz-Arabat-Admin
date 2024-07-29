@@ -61,6 +61,7 @@
                       <th>Email</th>
                       <th>Mobile Number</th>
                       <th>Description</th>
+                      <th>Date</th>
                    <!--    <th>Actions</th> -->
 
                     </tr>
@@ -74,6 +75,7 @@
                        <td>{{ $value->email }}</td>
                        <td>{{ $value->mobile }}</td>
                        <td>{{ $value->description }}</td>
+                       <td>{{ $value->created_at->format('d-m-Y  g:i A') }}</td>
                     <!--    <td> <a href="" title="View"><i class="text-info fa fa-eye"></i></a> </td> -->
                     </tr>
                     @endforeach

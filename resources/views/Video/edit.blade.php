@@ -21,7 +21,7 @@
                             {{ session('status') }}
                         </div>
                         @endif
-                        <form id="editPricingForm" enctype="multipart/form-data"  method="post", action="{{ route('video.update',$data->id) }}">
+                        <form id="editPricingForm" enctype="multipart/form-data"  method="POST", action="{{ route('video.update',$data->id) }}">
                             @csrf
                             @method('PUT')
                             <div class="card-body">                
@@ -48,34 +48,32 @@
 
 
                                     <div class="col-12">
-                                       <video width="120" height="140" autoplay>
-                                          <source src="{{env('STORAGE_PATH')}}/{{$data->video}}" >
+                                        <video width="120" height="140" autoplay>
                                             <source src="{{env('STORAGE_PATH')}}/{{$data->video}}" >
-                                              
-                                            </video>
-                                            <div class="form-group">
-                                                <label for="arabic_question">{{ __('adminlte::adminlte.video') }}<span class="text-danger"> *</span></label>
-                                                <input type="file" onchange="ValidateSingleInput(this);" placeholder="{{ __('adminlte::adminlte.video') }}" name="video" class="form-control" id="video"  >
-                                                @if($errors->has('video'))
-                                                <div class="error">{{ $errors->first('video') }}</div>
-                                                @endif
-                                            </div>
+                                            <source src="{{env('STORAGE_PATH')}}/{{$data->video}}" >
+                                                
+                                        </video>
+                                        <div class="form-group">
+                                            <label for="arabic_question">{{ __('adminlte::adminlte.video') }}<span class="text-danger"> *</span></label>
+                                            <input type="file" onchange="ValidateSingleInput(this);" placeholder="{{ __('adminlte::adminlte.video') }}" name="video" class="form-control" id="video"  >
+                                            @if($errors->has('video'))
+                                            <div class="error">{{ $errors->first('video') }}</div>
+                                            @endif
                                         </div>
-
-
                                     </div>
                                 </div>
-                                <!-- /.card-body -->
-                                <div class="card-footer">
-                                    <button type="text" class="btn btn-primary">{{ __('adminlte::adminlte.save') }}</button>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                            <!-- /.card-body -->
+                            <div class="card-footer">
+                                <button type="text" class="btn btn-primary">{{ __('adminlte::adminlte.save') }}</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
     @endsection
 
     @section('css')
@@ -84,7 +82,10 @@
     @section('js')
     <script>
 
-      var _validFileExtensions = [".MP4", ".MOV", ".WMV", ".AVCHD", ".MKV",".F4V",".SWF"];    
+ 
+
+
+      var _validFileExtensions = [".MP4", ".MOV", ".WMV", ".AVCHD", ".MKV",".F4V",".SWF",".mp4"];    
       function ValidateSingleInput(oInput) {
         if (oInput.type == "file") {
           var sFileName = oInput.value;

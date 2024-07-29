@@ -15,18 +15,22 @@ class PaymentRequestReceived extends Notification
     protected $job_id;
     protected $quoteCount;
     protected $accountType;
+    protected $title;
+    protected $body;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($job_id='' ,$quoteCount='',$accountType='')
+    public function __construct($job_id='' ,$quoteCount='',$accountType='',$title='',$body='')
     {          
 
         $this->job_id = $job_id;
        $this->quoteCount = $quoteCount;
        $this->accountType = $accountType;
+       $this->title = $title;
+       $this->body = $body;
    }
 
     /**
@@ -64,8 +68,8 @@ class PaymentRequestReceived extends Notification
 
         $message = new FcmMessage();
         $message->content([
-            'title'        => 'Payment Approved Sucessfully.', 
-            'body'         => 'Payment Approved Sucessfully.',
+            'title'        => $this->title, 
+            'body'         => "",//$this->body,
             'account_type' =>$this->accountType,
             'quote_count' =>$this->quoteCount, 
             'sound'        => '',  
@@ -73,8 +77,8 @@ class PaymentRequestReceived extends Notification
             'click_action' => ''  
         ])->data([
             'id'           => $this->job_id,
-            'title'        => 'Payment Approved Sucessfully', 
-            'body'         => 'Payment Approved Sucessfully.',
+            'title'        => $this->title, 
+            'body'         => "",//$this->body,
             'type'          =>2,
             'account_type'  =>$this->accountType,
             'quote_count'   =>$this->quoteCount,

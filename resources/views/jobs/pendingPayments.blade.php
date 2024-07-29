@@ -12,6 +12,22 @@
         .drp-calendar.left{
             background-color: white;
         }
+        .loader {
+    border: 2px solid #f3f3f3; /* Light grey */
+    border-top: 2px solid #fff; /* White */
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 5px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
     </style>
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -53,7 +69,13 @@
                                                 <td>{{$pendingPayment->userName}}</td>
                                                 <td>{{$pendingPayment->driverName}}</td> 
                                                 <td>{{$pendingPayment->status}}</td>
-                                                <td><a class="nav-link" href="javascript:void(0)" onclick="approvePayment({{$pendingPayment->id}})" style="background-color: #000000;color: #fff;padding: 6px 10px 8px 7px;">Approve</a></td>
+                                                <!-- <td><a class="nav-link" href="javascript:void(0)" onclick="approvePayment({{$pendingPayment->id}})" style="background-color: #000000;color: #fff;padding: 6px 10px 8px 7px;">Approve</a></td> -->
+                                                <td>
+                                                <a class="nav-link" href="javascript:void(0)" onclick="approvePayments(this,{{$pendingPayment->id}})" style="background-color: #000000; color: #fff; padding: 6px 10px 8px 7px;">
+                                                    <span class="button-text">Approve</span>
+                                                    <span class="loader" style="display: none;"></span>
+                                                </a>
+                                            </td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -85,45 +107,114 @@
 <script>
     function approvePayment(id){
 
-    Swal.fire({
-    title: "Are you sure",
-    text: "You want to approve this payment",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: "Yes approve it",
-  }).then((result) => {
-    if (result.isConfirmed) {
+//     Swal.fire({
+//     title: "Are you sure",
+//     text: "You want to approve this payment",
+//     icon: "warning",
+//     showCancelButton: true,
+//     confirmButtonColor: '#3085d6',
+//     cancelButtonColor: '#d33',
+//     confirmButtonText: "Yes approve it",
+//   }).then((result) => {
+//     if (result.isConfirmed) {
     
-      $.ajax({
-        type:'POST',
-        url:"{{route('pending.payment.approve')}}",
-        data:{
-          "_token"      : "{{ csrf_token() }}", 
-          "quote_id"    : id,
-        },
-        success:function(response){
+//       $.ajax({
+//         type:'POST',
+//         url:"{{route('pending.payment.approve')}}",
+//         data:{
+//           "_token"      : "{{ csrf_token() }}", 
+//           "quote_id"    : id,
+//         },
+//         success:function(response){
 
-            if(response==1){
-                $('#remove'+id).hide();
-                Swal.fire({ 
-                  text: "Payment approved successfully",
-                  icon: "success", 
-                });
-            }else{
-                Swal.fire({ 
-                  text: "Something went wrong.",
-                  icon: "error", 
-                });
-            }
-        }
-      });
+//             if(response==1){
+//                 $('#remove'+id).hide();
+//                 Swal.fire({ 
+//                   text: "Payment approved successfully",
+//                   icon: "success", 
+//                 });
+//             }else{
+//                 Swal.fire({ 
+//                   text: "Something went wrong.",
+//                   icon: "error", 
+//                 });
+//             }
+//         }
+//       });
   
-    }
-  });
+//     }
+//   });
 
 
     }
+
+
+    function approvePayments(button,paymentId) {
+
+        Swal.fire({
+            title: "Are you sure",
+            text: "You want to approve this payment",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: "Yes approve it",
+        }).then((result) => {
+            
+            if (result.isConfirmed) {
+
+        var loader = button.querySelector('.loader');
+        var buttonText = button.querySelector('.button-text');
+        
+        buttonText.textContent = 'Processing...';
+        loader.style.display = 'inline-block';
+        button.onclick = null;
+            $.ajax({
+                type:'POST',
+                url:"{{route('pending.payment.approve')}}",
+                data:{
+                "_token"      : "{{ csrf_token() }}", 
+                "quote_id"    : paymentId,
+                },
+                success:function(response){
+
+                    if(response==1){
+                        $('#remove'+paymentId).hide();
+                        Swal.fire({ 
+                        text: "Payment approved successfully",
+                        icon: "success", 
+                        });
+                        buttonText.textContent = 'Approve';
+                        loader.style.display = 'none';
+                        button.onclick = function() { approvePayments(button, paymentId); };
+                        
+                    }else{
+                        Swal.fire({ 
+                        text: "Something went wrong.",
+                        icon: "error", 
+                        });
+                    }
+                }
+            });
+        
+            }
+        });
+
+
+
+    
+
+
+
+    // setTimeout(function() {
+    //     buttonText.textContent = 'Approve';
+    //     loader.style.display = 'none';
+    //     button.onclick = function() { approvePayments(button, paymentId); };
+       
+    // }, 2000); 
+
+
+
+}
 </script>
 @stop

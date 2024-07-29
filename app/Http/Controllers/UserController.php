@@ -376,8 +376,8 @@ public function update(Request $request, $id)
         $image              = Storage::disk('public')->putFile('ProfileImage',$request->profile_image);
         $data['profile_image']      ='storage/'.$image;
     }
-
-
+    $data['account_type']      ='1';
+   
     User::where('id',$id)->update($data);
     return redirect()->route('users.index')->with('success','updated successfully');
 }

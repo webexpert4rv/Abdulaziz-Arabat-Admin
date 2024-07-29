@@ -13,16 +13,20 @@ class Booking extends Notification implements ShouldQueue
     use Queueable;
 
     protected $job_id;
+    protected $title;
+    protected $body;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($job_id='')
+    public function __construct($job_id='',$title='',$body='')
     {          
 
        $this->job_id = $job_id;
+       $this->title = $title;
+       $this->body = $body;
    }
 
     /**
@@ -55,14 +59,14 @@ class Booking extends Notification implements ShouldQueue
 
         $message = new FcmMessage();
         $message->content([
-            'title'        => 'Booking successfull', 
-            'body'         => 'Your job successfully booked.', 
+            'title'        => $this->title, 
+            'body'         =>"",//$this->body,
             'sound'        => '',  
             'icon'         => '',  
             'click_action' => ''  
         ])->data([
-            'title'        => 'Booking successfull', 
-            'body'         => 'Your job successfully booked.',             
+            'title'        => $this->title, 
+            'body'         =>"",//$this->body,             
             'html'         => 'HTML',
             'id'           =>  $this->job_id,
             'type'         =>  1,

@@ -17,7 +17,7 @@ class SettingController extends Controller
         $data['show_promo_app'] = $request->show_promo_app;
         $data['show_referel_app'] = $request->show_referel_app;
         $data['rfq_limit_for_driver'] = $request->rfq_limit_for_driver;
-        // $data['rfq_limit_for_user'] = $request->rfq_limit_for_user;
+        $data['user_timer_duration'] = $request->user_timer_duration;
         if($request->isMethod('post')){
             if($setting){
                 $setting->update($data);

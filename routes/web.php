@@ -59,10 +59,15 @@ Route::get('/', function () {
 
 
 Route::middleware(['auth:admin','prevent-back-history'])->group(function (){
+  
   Route::group(['prefix' => 'admin'], function(){
+    
+    Route::get('/download-image/{path}', [AdminController::class, 'download'])->where('path', '.*')->name('download.image');
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::post('/set-session',[AdminController::class, 'setSession'])->name('setSession');
     // Route::post('/set-session',[AdminController::class, 'setSession'])->name('setSession');
+
+   
     
     Route::resource('users',UserController::class);
     Route::get('create-user', [UserController::class, 'create'])->name('create-user');
@@ -113,6 +118,10 @@ Route::middleware(['auth:admin','prevent-back-history'])->group(function (){
     Route::post('driver-add',[TransporterController::class,'DriverAdd'])->name('driver.add');
     Route::post('driver-update',[TransporterController::class,'DriverUpdate'])->name('driver.update');
     Route::post('driver-delete/{id}',[TransporterController::class,'DriverDelete'])->name('driver.delete');
+ 
+    Route::get('driver/list', [TransporterController::class, 'driverList'])->name('driver.list');
+
+    
 
     Route::resource('jobs',JobsController::class);
     Route::get('create-job', [JobsController::class, 'create'])->name('create-job');
@@ -122,7 +131,7 @@ Route::middleware(['auth:admin','prevent-back-history'])->group(function (){
     Route::get('edit-job', [JobsController::class, 'editJob'])->name('edit-job');
     Route::get('manually-job', [JobsController::class, 'manuallyJob'])->name('manually-job');
     Route::get('download-past-invoice', [JobsController::class, 'downloadPastInvoice'])->name('download-past-invoice');
-    Route::post('sub-regions',  [JobsController::class, 'subRegions'])->name('job.sub-regions');
+    Route::post('sub-regions',  [JobsController::class, 'subRegions'])->name('job.sub-regions'); 
     Route::post('receiver_wrap',  [JobsController::class, 'receiverWrap'])->name('job.receiver_wrap');
     Route::post('job-store',  [JobsController::class, 'jobStore'])->name('job.store');
     Route::post('job-store2',  [JobsController::class, 'jobStore2'])->name('job.store2');
@@ -225,6 +234,9 @@ Route::middleware(['auth:admin','prevent-back-history'])->group(function (){
 
     Route::match(['get','post'],'setting',[SettingController::class,'setting'])->name('setting');
 
+ 
+
+
         //For testimonials
     Route::resource('testimonials',TestimonialController::class);
     Route::resource('banner',BannerController::class);
@@ -282,9 +294,17 @@ Route::middleware(['auth:admin','prevent-back-history'])->group(function (){
 
    //Update information
 
+
+   
+  
     Route::group(['prefix' => 'update_info'], function () {
-      Route::get('/list', [TicketsController::class, 'updateInformationList'])->name('update_information_list');
+      Route::get('/list', [TicketsController::class, 'updateInformationList'])->name('update-information');
+      Route::post('/update_information', [TicketsController::class, 'updateInformation'])->name('user_update_information');
+
+
+      
       Route::get('/view/{id}', [TicketsController::class, 'viewupdateInformationMessage'])->name('view_update_information_list_message');
+      
       Route::get('/reply1/{id}', [TicketsController::class, 'reply1'])->name('update_info.reply1');
      Route::post('/send-reply1', [TicketsController::class, 'SendReply1'])->name('update_information.send_reply1');
 

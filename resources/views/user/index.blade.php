@@ -64,10 +64,9 @@
                                           <th style="width: 1000%;">{{ __('adminlte::adminlte.userId') }}</th>
                                           <th>{{ __('adminlte::adminlte.email') }}</th>
                                           <th>{{ __('adminlte::adminlte.name') }}</th>
-                                          <th>{{ __('adminlte::adminlte.account_type') }}</th>
-                                          <th>{{ __('adminlte::adminlte.number_of_job') }}</th>
                                           <th>{{ __('adminlte::adminlte.phone_number') }}</th>
-
+                                          <th>{{ __('adminlte::adminlte.account_type') }}</th>
+                                          <th>{{ __('adminlte::adminlte.number_of_job') }}</th>    
                                           <th>{{ __('adminlte::adminlte.created_at') }}</th>
                                           <th>Status</th>
                                           <th>{{ __('adminlte::adminlte.actions') }}</th>
@@ -186,9 +185,10 @@ columns: [
     {data: 'unique_ID', name: 'unique_ID'},
     {data: 'email', name: 'email'},
     {data: 'name', name: 'name'},
+    {data: 'phone_number', name: 'phone_number'}, 
     {data: 'account_type', name: 'account_type'},
     {data: 'booking_count', name: 'booking_count'},
-    {data: 'phone_number', name: 'phone_number', visible: false}, 
+   
     {data: 'created_at', name: 'created_at'},
     {data: 'status', name: 'status'},
     {data: 'action', name: 'action', orderable: false, searchable: false},

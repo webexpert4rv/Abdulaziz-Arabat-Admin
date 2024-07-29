@@ -41,7 +41,8 @@ class ExportUserQuations implements FromCollection, WithHeadings, WithMapping,Sh
             $q->where('status','!=','accepted');
         })*/
         ->get();
-        //echo '<pre>'; print_r($jobLists);
+   
+
         $data=[];
         $totalQuotes=0;
         foreach ($jobLists as $key => $value){
@@ -93,7 +94,7 @@ class ExportUserQuations implements FromCollection, WithHeadings, WithMapping,Sh
                 }
 
 
-                if ($scheduleDate>=Carbon::now()->subDays(10)) {   
+                if ($scheduleDate>=Carbon::now()->subDays(30)) {   
 
                     $data[]=[
                         'id'                    => @$value->id,
@@ -114,10 +115,11 @@ class ExportUserQuations implements FromCollection, WithHeadings, WithMapping,Sh
                         'rfq_status'            => @$value->rfq_status,
                         'schedule_date_status'  => @$value->is_active_date.' '.$value->is_active_date>=date('Y-m-d h:i')?1:0 ,
                         'Carbon'                => @date('d-m-Y h:i'),  
-                        'deliveryNote'          => @$value->requirements,                
+                        'deliveryNote'          => @$value->requirements,    
+                        'created_at'            => @$value->created_at->format('Y-m-d'),           
 
                     ];
-                }
+                 }
             }
         }  
         // echo '<pre>'; print_r($data); die;
@@ -140,6 +142,7 @@ class ExportUserQuations implements FromCollection, WithHeadings, WithMapping,Sh
             "Total Quotes",
             "RFQ Status", 
             "deliveryNote",
+            "Created at",
             
         ];
     }
@@ -158,6 +161,7 @@ class ExportUserQuations implements FromCollection, WithHeadings, WithMapping,Sh
             @$data['total_quotes'], 
             @$data['rfq_status'],  
             @$data['deliveryNote'], 
+            @$data['created_at'], 
         ];
     }
 

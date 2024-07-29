@@ -94,12 +94,37 @@ public function deletedTransporterList(){
 
 public function permanentDeleteTransporter(Request $request){
 
+    // Delete related records first
     ReferrerWallet::where('user_id', $request->id)->delete();
     OtpVerification::where('user_id', $request->id)->delete();
     MoreDocument::where('user_id', $request->id)->delete();
-    $users = User::where('id', $request->id)->onlyTrashed()->first();
+    SpecialRequest::where('user_id', $request->id)->delete();
+    
+   // Find the soft-deleted user
+    
 
-    $deleteUsers = $users->forceDelete();
+    // Find and delete users with the given user as a parent
+    $childUsers = User::where('parent_id', $request->id)->onlyTrashed()->get();
+    foreach ($childUsers as $childUser) {
+        ReferrerWallet::where('user_id', $childUser->id)->delete();
+        OtpVerification::where('user_id', $childUser->id)->delete();
+        MoreDocument::where('user_id', $childUser->id)->delete();
+        SpecialRequest::where('user_id', $childUser->id)->delete();
+        $childUser->forceDelete();
+    }
+
+  
+   $user = User::where('id', $request->id)->onlyTrashed()->first();
+   
+   if ($user) {
+       // Permanently delete the user
+       $deleteUser = $user->forceDelete();
+       
+       if ($deleteUser) {
+           $res['success'] = 1;
+           return response()->json($res);
+       }
+   }
 
     if($deleteUsers) {
         $res['success'] = 1;

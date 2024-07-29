@@ -31,7 +31,7 @@ body {
     <div class="col-md-12">
         <div class="card">
           <div class="card-header alert d-flex justify-content-between align-items-center">
-            <h3>Download Quations and Invoices</h3>
+            <h3>Download Quotations and Invoices</h3>
             <a class="btn btn-sm btn-success" href="{{ url()->previous() }}">{{ __('adminlte::adminlte.back') }}</a>
           </div>
           <div class="card-body">
@@ -41,62 +41,61 @@ body {
               </div>
             @endif
              
+                <div class="card-body">  
                               
-                                <div class="card-body">  
-                                             
-                                    <div class="row">
-                                      <div class="col-6">
-                                        <form method="post" action="{{ route('download-user-quation',['type'=>'user']) }}" enctype="multipart/form-data">
-                                            <div class="form-group">
-                                                <label for="email">Select User</label>
-                                                <select required data-placeholder="Select User" name="user_id" id="user_id" style="border-radius: 9px;width: 100%;height: 59px;" class="  selectpicker input-vehicle" data-live-search="true" data-container="body"> 
-                                                  <option value="" selected="">Select User</option>
-                                                @foreach($getUsers as $getUser)
-                                                <option value="{{$getUser->id}}">{{$getUser->name}}</option> 
-                                                @endforeach
-                                              </select>
-                                                <div id ="email_error" class="error"></div>
-                                                @if($errors->has('email'))
-                                                <div class="error">{{ $errors->last('email') }}</div>
-                                                @endif
-                                            </div>
-                                            <div>
-                                                    <button type="submit" name="action" value="userQuations" style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Quations</button>
-                                                    <button type="submit" name="action" value="userInvoice" style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Invoices</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <div class="col-6">
-                                            <form method="post" action="{{ route('download-transporter-quation',['type'=>'transporter']) }}" enctype="multipart/form-data">
-                                            <div class="form-group">
-                                                <label for="email">Select Transporter</label>
-                                                <select required data-placeholder="Select Transporter" name="transporter_id" id="transporter_id" style="border-radius: 9px;width: 100%;height: 59px;" class="  selectpicker input-vehicle" data-live-search="true" data-container="body"> 
-                                                  <option value="" selected="">Select Transporter</option>
-                                                @foreach($getTransporters as $getTransporter)
-                                                <option value="{{$getTransporter->id}}">{{$getTransporter->name}}</option> 
-                                                @endforeach
-                                              </select>
-                                                <div id ="email_error" class="error"></div>
-                                                @if($errors->has('email'))
-                                                <div class="error">{{ $errors->last('email') }}</div>
-                                                @endif
-                                            </div>
-                                             <div>
-                                                    <button type="submit"  name="action" value="transporterQuations" style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Quations</button>
-                                                    <button type="submit" name="action" value="transporterInvoice"  style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Invoices</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                       
-                                        
-
-                                        
-                                        
-                                         
-                                    </div>
-                                 
-                                    
+                    <div class="row">
+                      <div class="col-6">
+                        <form method="post" action="{{ route('download-user-quation',['type'=>'user']) }}" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="email">Select User</label>
+                                <select required data-placeholder="Select User" name="user_id" id="user_id" style="border-radius: 9px;width: 100%;height: 59px; padding-left: 14px;" class="  selectpicker input-vehicle" data-live-search="true" data-container="body"> 
+                                  <option value="" selected="">Select User</option>
+                                @foreach($getUsers as $getUser)
+                                <option value="{{$getUser->id}}">{{$getUser->name}}</option> 
+                                @endforeach
+                              </select>
+                                <div id ="email_error" class="error"></div>
+                                @if($errors->has('email'))
+                                <div class="error">{{ $errors->last('email') }}</div>
+                                @endif
+                              </div>
+                              <div>
+                                  <button type="submit" name="action" value="userQuations" style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Quations</button>
+                                  <button type="submit" name="action" value="userInvoice" style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Invoices</button>
+                              </div>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <form method="post" action="{{ route('download-transporter-quation',['type'=>'transporter']) }}" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="email">Select Transporter</label>
+                                <select required data-placeholder="Select Transporter" name="transporter_id" id="transporter_id" style="border-radius: 9px;width: 100%;height: 59px; padding-left: 14px;" class="  selectpicker input-vehicle" data-live-search="true" data-container="body"> 
+                                  <option value="" selected="">Select Transporter</option>
+                                @foreach($getTransporters as $getTransporter)
+                                <option value="{{$getTransporter->id}}">{{$getTransporter->name}}</option> 
+                                @endforeach
+                              </select>
+                                <div id ="email_error" class="error"></div>
+                                @if($errors->has('email'))
+                                <div class="error">{{ $errors->last('email') }}</div>
+                                @endif
                             </div>
+                              <div>
+                                    <button type="submit"  name="action" value="transporterQuations" style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Quotations</button>
+                                    <button type="submit" name="action" value="transporterInvoice"  style="background-color: #ffcd00;border: 1px solid #ffcd00;" class="btn btn-primary">Download Invoices</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        
+
+                        
+                        
+                          
+                    </div>
+                  
+                    
+            </div>
                              
           </div>
         </div>

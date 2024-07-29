@@ -159,7 +159,7 @@
                            <p style="margin: 0px;">{{$data['job']['description_of_goods']}} : <strong>الوزن الإجمالي للبضائع</strong></p>
                            <p style="margin: 0px;">{{$data['job']['vehicle_type']}}  : ><strong>نوع المركبة</strong></p>
                            <p style="margin: 0px;">{{$data['job']['pick_up_address']}}  : ><strong>من</strong></p>
-                           <p style="margin: 0px;">- {{$destinationAddress}}  : ><strong>الى</strong></p> 
+                           <p style="margin: 0px;">- {{@$destinationAddress}}  : ><strong>الى</strong></p> 
                            <p style="margin: 0px;">- <strong style="color: #f00;">{{$data['tota']['sub_amount']}} : تكلفة الشحن (شامل الضريبة)</strong></p>
                            <p style="margin: 0px;">- [ سيتم إصدار فاتورة الطلب من قبل الناقل : <strong>ملحوظة</strong>.]</p>
 

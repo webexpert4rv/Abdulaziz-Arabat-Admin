@@ -39,6 +39,10 @@ return [
     'storage_image_path'=>[
         'image_path'=>env('STORAGE_PATH'),
         'web_path'=>env('WEB_PATH')
-    ]
+    ],
 
+    'storage_path'=>[
+        'image_path'=>env('STORAGE_IMAGE_PATH'),         
+    ]
+   
 ];

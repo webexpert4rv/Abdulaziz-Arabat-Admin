@@ -13,16 +13,20 @@ class DriverAssignment extends Notification
     use Queueable;
 
     protected $job_id;
+    protected $title;
+    protected $body;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($job_id='')
+    public function __construct($job_id='',$title='',$body='')
     {          
 
        $this->job_id = $job_id;
+       $this->title = $title;
+       $this->body = $body;
    }
 
     /**
@@ -56,15 +60,15 @@ class DriverAssignment extends Notification
         $message = new FcmMessage();
         $message->content([
             'id'           =>  $this->job_id,             
-            'title'        => 'New job assigned', 
-            'body'         => 'New Job Assigned successfully.',             
+            'title'        => $this->title, 
+            'body'         =>"",//$this->body,            
             'html'         => 'HTML',
             'sound'        => '',  
             'icon'         => '',  
             'click_action' => ''  
         ])->data([
-            'title'        => 'New job assigned', 
-            'body'         => 'New Job Assigned successfully.',             
+            'title'        => $this->title, 
+            'body'         =>"",//$this->body,            
             'html'         => 'HTML',
             'id'           =>  $this->job_id,
             'type'         =>  1,

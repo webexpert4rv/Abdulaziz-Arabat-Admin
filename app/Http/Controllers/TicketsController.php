@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\TicketMessage;
 use App\Models\Admin;
+use App\Models\User;
 use App\Models\Recruiter;
 use App\Models\Organization;
 use App\Models\Feedback;
@@ -223,45 +224,61 @@ class TicketsController extends Controller {
 		return view('contact_us/special_request_list', compact('specialRequests'));
 	}
 
-public function updateInformationList(Request $request) {
-		$updateinformationlist = UpdateQuery::orderByDesc('id')->get();
-		//dd($contactUsMessagesList); 
-		return view('update-info/update_info_list', ['updateinformationlist' => $updateinformationlist]);
+
+
+	public function updateInformationList(Request $request) {
+			
+		$updateinformationlist = UpdateQuery::orderByDesc('updated_at')->get();
+ 
+			return view('update-info/update_info_list', ['updateinformationlist' => $updateinformationlist]);
 	}
 
 
-public function viewupdateInformationMessage($id) {
+	public function updateInformation(Request $request) {
+
+		$updateinfo = UpdateQuery::where('user_id', $request->user_id)->first();			
+
+		User::where('id', $request->user_id)->update(['email' =>$updateinfo->email,'phone_number' =>$updateinfo->mobile_number]); 
+		$updateinformationlist = UpdateQuery::where('user_id', $request->user_id)->update(['is_updated' => 1]);
+
+		if($updateinformationlist){
+			return 1;
+		}else{
+			return 2;
+		}
+	
+	}
+
+
+	public function viewupdateInformationMessage($id) {
 		$updateInformationMessage = UpdateQuery::find($id);
 		return view('update-info/view_update_info_message', [ 'updateInformationMessage' => $updateInformationMessage ]);
 		
 	}
 
-public function reply1($id){
-		$update_information = UpdateQuery::find($id);
-		return view('update-info.reply1')->with(['update_information'=>$update_information]);
-	}
+	public function reply1($id){
+			$update_information = UpdateQuery::find($id);
+			return view('update-info.reply1')->with(['update_information'=>$update_information]);
+		}
 
-public function SendReply1(Request $request){
+	 public function SendReply1(Request $request){
 		try{ 
 
-			$subject = "RE:".$request->subject;
-			$data['msg']= $request->message;
-			$data['signature']= $request->signature;
-			$contact_us = UpdateQuery::find($request->id);
-			//dd($contact_us);
-			$data['username']=$contact_us->name;
-			
-			Mail::send('emails.reply_to_user', $data, function ($message) use($subject,$contact_us){
-		    $message->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'));
-		    $message->subject($subject );
-		    $message->to($contact_us->old_email);
+		$subject = "RE:".$request->subject;
+		$data['msg']= $request->message;
+		$data['signature']= $request->signature;
+		$contact_us = UpdateQuery::find($request->id);
+	
+		$data['username']=$contact_us->name;
+		
+		Mail::send('emails.reply_to_user', $data, function ($message) use($subject,$contact_us){
+		$message->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'));
+		$message->subject($subject );
+		$message->to($contact_us->old_email);
 		});
 			return redirect()->back()->with('success','Reply has been sent successfully!');
 		}catch(\Exception $e){
 			return redirect()->back()->with('error',$e->getMessage());
 		}
 	}
-
-
-
 }
